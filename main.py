@@ -1,5 +1,6 @@
 import sys
 import pygame
+from sapper import Sapper
 
 
 # move these constants to separate files
@@ -16,8 +17,11 @@ def main():
     pygame.display.set_caption('Intelligent Sapper')
     clock = pygame.time.Clock()
 
+    sapper = Sapper(576, 672, 'gfx/sapper/sapper.png')
+
     while True:
 
+        screen.fill(BLACK)
         # drawing the rectangles
         for x in range(0, WINDOW_WIDTH, BLOCK_SIZE):
             for y in range(0, WINDOW_HEIGHT, BLOCK_SIZE):
@@ -30,7 +34,19 @@ def main():
                 pygame.display.quit()
                 pygame.quit()
                 sys.exit()
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_w:
+                    sapper.move_up(BLOCK_SIZE)
+                if event.key == pygame.K_s:
+                    sapper.move_down(BLOCK_SIZE)
+                if event.key == pygame.K_a:
+                    sapper.move_left(BLOCK_SIZE)
+                if event.key == pygame.K_d:
+                    sapper.move_right(BLOCK_SIZE)
 
+        screen.blit(sapper.get_surf(), sapper.get_rect())
+        
         pygame.display.update()
         clock.tick(60)
 
