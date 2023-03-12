@@ -11,25 +11,8 @@ WINDOW_HEIGHT = 736
 BLOCK_SIZE = 32
 
 
-def main():
-    pygame.init()
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption('Intelligent Sapper')
-    clock = pygame.time.Clock()
-
-    sapper = Sapper(576, 672, 'gfx/sapper/sapper.png')
-
-    while True:
-
-        screen.fill(BLACK)
-        # drawing the rectangles
-        for x in range(0, WINDOW_WIDTH, BLOCK_SIZE):
-            for y in range(0, WINDOW_HEIGHT, BLOCK_SIZE):
-                rectangle = pygame.Rect(x, y, BLOCK_SIZE, BLOCK_SIZE)
-                pygame.draw.rect(screen, WHITE, rectangle, 1)
-
-        # checking for events
-        for event in pygame.event.get():
+def handle_events(sapper):
+    for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.display.quit()
                 pygame.quit()
@@ -45,6 +28,27 @@ def main():
                 if event.key == pygame.K_d:
                     sapper.move_right(BLOCK_SIZE)
 
+
+def draw_grid(screen):
+    for x in range(0, WINDOW_WIDTH, BLOCK_SIZE):
+            for y in range(0, WINDOW_HEIGHT, BLOCK_SIZE):
+                rectangle = pygame.Rect(x, y, BLOCK_SIZE, BLOCK_SIZE)
+                pygame.draw.rect(screen, WHITE, rectangle, 1)
+
+
+def main():
+    pygame.init()
+    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    pygame.display.set_caption('Intelligent Sapper')
+    clock = pygame.time.Clock()
+
+    sapper = Sapper(576, 672, 'gfx/sapper/sapper.png')
+
+    while True:
+        handle_events(sapper)
+
+        screen.fill(BLACK)
+        draw_grid(screen)
         screen.blit(sapper.get_surf(), sapper.get_rect())
         
         pygame.display.update()
