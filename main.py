@@ -29,11 +29,18 @@ def handle_events(sapper):
                     sapper.move_right(BLOCK_SIZE)
 
 
-def draw_grid(screen):
+def create_grid_rects():
+    rects = []
     for x in range(0, WINDOW_WIDTH, BLOCK_SIZE):
-            for y in range(0, WINDOW_HEIGHT, BLOCK_SIZE):
-                rectangle = pygame.Rect(x, y, BLOCK_SIZE, BLOCK_SIZE)
-                pygame.draw.rect(screen, WHITE, rectangle, 1)
+        for y in range(0, WINDOW_HEIGHT, BLOCK_SIZE):
+            rect = pygame.Rect(x, y, BLOCK_SIZE, BLOCK_SIZE)
+            rects.append(rect)
+    return rects
+
+
+def draw_grid(screen, rects):
+    for rect in rects:
+        pygame.draw.rect(screen, WHITE, rect, 1)
 
 
 def main():
@@ -43,12 +50,13 @@ def main():
     clock = pygame.time.Clock()
 
     sapper = Sapper(576, 672, 'gfx/sapper/sapper.png')
+    grid_rects = create_grid_rects()
 
     while True:
         handle_events(sapper)
 
         screen.fill(BLACK)
-        draw_grid(screen)
+        draw_grid(screen, grid_rects)
         screen.blit(sapper.get_surf(), sapper.get_rect())
         
         pygame.display.update()
