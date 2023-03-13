@@ -20,13 +20,13 @@ def handle_events(sapper):
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_w:
-                    sapper.move_up(BLOCK_SIZE)
+                    sapper.move_up()
                 if event.key == pygame.K_s:
-                    sapper.move_down(BLOCK_SIZE)
+                    sapper.move_down()
                 if event.key == pygame.K_a:
-                    sapper.move_left(BLOCK_SIZE)
+                    sapper.move_left()
                 if event.key == pygame.K_d:
-                    sapper.move_right(BLOCK_SIZE)
+                    sapper.move_right()
 
 
 def create_grid_rects():
@@ -49,7 +49,7 @@ def main():
     pygame.display.set_caption('Intelligent Sapper')
     clock = pygame.time.Clock()
 
-    sapper = Sapper(576, 672, 'gfx/sapper/sapper.png')
+    sapper = Sapper((576, 672), 'gfx/sapper/sapper.png', BLOCK_SIZE, (WINDOW_WIDTH, WINDOW_HEIGHT))
     grid_rects = create_grid_rects()
 
     while True:

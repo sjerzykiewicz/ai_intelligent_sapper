@@ -1,32 +1,46 @@
 import pygame
 
 class Sapper():
-    def __init__(self, x, y, img):
+    def __init__(self, pos, img, block_size, win_size):
         self.surf = pygame.image.load(img).convert_alpha()
-        self.rect = self.surf.get_rect(topleft = (x, y))
+        self.rect = self.surf.get_rect(topleft = pos)
         self.origin_surf = self.surf
+        self.block_size = block_size
+        self.win_x, self.win_y = win_size
         self.angle = 0
     
-    def move_up(self, block_size):
-        self.rect.top -= block_size
+    def move_up(self):
+        if self.rect.y == 0:
+            return
+
+        self.rect.top -= self.block_size
         if self.angle != 0:
             self.surf = self.origin_surf
             self.angle = 0
     
-    def move_down(self, block_size):
-        self.rect.top += block_size
+    def move_down(self):
+        if self.rect.y == self.win_y - self.block_size:
+            return
+
+        self.rect.top += self.block_size
         if self.angle != 180:
             self.surf = pygame.transform.rotate(self.origin_surf, 180)
             self.angle = 180
     
-    def move_right(self, block_size):
-        self.rect.left += block_size
+    def move_right(self):
+        if self.rect.x == self.win_x - self.block_size:
+            return
+
+        self.rect.left += self.block_size
         if self.angle != 90:
             self.surf = pygame.transform.rotate(self.origin_surf, 90)
             self.angle = 90
     
-    def move_left(self, block_size):
-        self.rect.left-= block_size
+    def move_left(self):
+        if self.rect.x == 0:
+            return
+            
+        self.rect.left-= self.block_size
         if self.angle != 270:
             self.surf = pygame.transform.rotate(self.origin_surf, 270)
             self.angle = 270
