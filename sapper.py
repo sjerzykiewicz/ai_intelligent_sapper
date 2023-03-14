@@ -10,7 +10,7 @@ class Sapper():
         self.angle = 0
     
     def move_up(self):
-        if self.rect.y == 0:
+        if self.rect.y == self.block_size:
             return
 
         self.rect.top -= self.block_size
@@ -19,7 +19,7 @@ class Sapper():
             self.angle = 0
     
     def move_down(self):
-        if self.rect.y == self.win_y - self.block_size:
+        if self.rect.y == self.win_y - 2 * self.block_size:
             return
 
         self.rect.top += self.block_size
@@ -28,7 +28,7 @@ class Sapper():
             self.angle = 180
     
     def move_right(self):
-        if self.rect.x == self.win_x - self.block_size:
+        if self.rect.x == self.win_x - 2 * self.block_size:
             return
 
         self.rect.left += self.block_size
@@ -37,7 +37,7 @@ class Sapper():
             self.angle = 270
     
     def move_left(self):
-        if self.rect.x == 0:
+        if self.rect.x == self.block_size:
             return
             
         self.rect.left-= self.block_size
