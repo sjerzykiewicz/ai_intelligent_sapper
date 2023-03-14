@@ -32,18 +32,18 @@ class Sapper():
             return
 
         self.rect.left += self.block_size
-        if self.angle != 90:
-            self.surf = pygame.transform.rotate(self.origin_surf, 90)
-            self.angle = 90
+        if self.angle != 270:
+            self.surf = pygame.transform.rotate(self.origin_surf, 270)
+            self.angle = 270
     
     def move_left(self):
         if self.rect.x == 0:
             return
             
         self.rect.left-= self.block_size
-        if self.angle != 270:
-            self.surf = pygame.transform.rotate(self.origin_surf, 270)
-            self.angle = 270
+        if self.angle != 90:
+            self.surf = pygame.transform.rotate(self.origin_surf, 90)
+            self.angle = 90
         
     def get_surf(self):
         return self.surf
