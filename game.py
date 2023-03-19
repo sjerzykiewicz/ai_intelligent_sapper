@@ -17,9 +17,15 @@ class Game():
         self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         self.clock = pygame.time.Clock()
 
+        self.rects = self._create_grid_rects()
+
         sapper_path = "gfx/sapper/sapper.png"
         self.sapper = Sapper((576, 672), sapper_path, self.BLOCK_SIZE, (self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
-        self.rects = self._create_grid_rects()
+
+        landmine_path = "gfx/bombs/landmine.png"
+        self.landmine_surf = pygame.image.load(landmine_path).convert_alpha()
+        rows, columns = self.WINDOW_WIDTH // self.BLOCK_SIZE, self.WINDOW_HEIGHT // self.BLOCK_SIZE
+        self.is_landmine_here = [[False for col in range(columns)] for row in range(rows)]
 
     
     def run(self):
@@ -46,6 +52,16 @@ class Game():
                     self.sapper.move_left()
                 if event.key == pygame.K_d:
                     self.sapper.move_right()
+            
+            mouse_pressed = pygame.mouse.get_pressed()
+            x, y = pygame.mouse.get_pos()
+            x //= self.BLOCK_SIZE
+            y //= self.BLOCK_SIZE
+            if mouse_pressed[0]:
+                self.is_landmine_here[x][y] = True
+
+            if mouse_pressed[2]:
+                self.is_landmine_here[x][y] = False
 
     
     def _game_logic(self):
@@ -56,9 +72,19 @@ class Game():
         self.screen.fill(self.BLACK)
         self._draw_grid()
         self._draw_fence()
+        self._draw_landmines()
         self.screen.blit(self.sapper.get_surf(), self.sapper.get_rect())
 
         pygame.display.update()
+
+    
+    def _draw_landmines(self):
+        for row in range(len(self.is_landmine_here)):
+            for col in range(len(self.is_landmine_here[0])):
+                if self.is_landmine_here[row][col]:
+                    x, y = row * self.BLOCK_SIZE, col * self.BLOCK_SIZE
+                    bomb_rect = self.landmine_surf.get_rect(topleft = (x, y))
+                    self.screen.blit(self.landmine_surf, bomb_rect)
 
 
     def _create_grid_rects(self):
