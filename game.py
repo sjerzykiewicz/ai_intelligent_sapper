@@ -71,8 +71,8 @@ class Game():
     def _draw_screen(self):
         self.screen.fill(self.BLACK)
         self._draw_grid()
-        self._draw_fence()
         self._draw_landmines()
+        self._draw_fence()
         self.screen.blit(self.sapper.get_surf(), self.sapper.get_rect())
 
         pygame.display.update()
