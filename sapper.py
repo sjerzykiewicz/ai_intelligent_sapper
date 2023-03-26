@@ -2,6 +2,11 @@ import pygame
 
 class Sapper():
     def __init__(self, pos, img, block_size, win_size):
+
+        self.speed = 10
+        self.bombs_that_can_defuse = []
+        self.capacity = 7
+
         self.surf = pygame.image.load(img).convert_alpha()
         self.rect = self.surf.get_rect(topleft = pos)
         self.origin_surf = self.surf
@@ -50,5 +55,8 @@ class Sapper():
     
     def get_rect(self):
         return self.rect
+    
+    def get_pos(self):
+        return self.rect.x // self.block_size, self.rect.y // self.block_size
     
     
