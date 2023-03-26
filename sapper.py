@@ -56,4 +56,7 @@ class Sapper():
     def get_rect(self):
         return self.rect
     
+    def get_pos(self):
+        return self.rect.x // self.block_size, self.rect.y // self.block_size
+    
     

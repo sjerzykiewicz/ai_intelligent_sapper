@@ -68,7 +68,8 @@ class Game():
 
     
     def _game_logic(self):
-        return
+        sapper_x, sapper_y = self.sapper.get_pos()
+        self.is_landmine_here[sapper_x][sapper_y] = False
 
 
     def _draw_screen(self):
