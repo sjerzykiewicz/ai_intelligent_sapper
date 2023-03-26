@@ -17,6 +17,9 @@ class Game():
         self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         self.clock = pygame.time.Clock()
 
+
+        grass_path = "gfx/surfaces/grass.png"
+        self.grass_surf = pygame.image.load(grass_path).convert_alpha()
         self.rects = self._create_grid_rects()
 
         sapper_path = "gfx/sapper/sapper.png"
@@ -91,14 +94,14 @@ class Game():
         rects = []
         for x in range(0, self.WINDOW_WIDTH, self.BLOCK_SIZE):
             for y in range(0, self.WINDOW_HEIGHT, self.BLOCK_SIZE):
-                rect = pygame.Rect(x, y, self.BLOCK_SIZE, self.BLOCK_SIZE)
+                rect = self.grass_surf.get_rect(topleft = (x, y))
                 rects.append(rect)
         return rects
 
 
     def _draw_grid(self):
         for rect in self.rects:
-            pygame.draw.rect(self.screen, self.WHITE, rect, 1)
+            self.screen.blit(self.grass_surf, rect)
             
 
     def _draw_fence(self):
