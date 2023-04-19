@@ -14,6 +14,40 @@ class Sapper:
         self.win_x, self.win_y = win_size
         self.angle = 0
 
+    def move_forward(self, occupied_blocks):
+        if self.angle == 0:
+            if (
+                self.rect.x // self.block_size,
+                self.rect.y // self.block_size - 1,
+            ) not in occupied_blocks:
+                self.rect.top -= self.block_size
+        if self.angle == 90:
+            if (
+                self.rect.x // self.block_size - 1,
+                self.rect.y // self.block_size,
+            ) not in occupied_blocks:
+                self.rect.left -= self.block_size
+        if self.angle == 180:
+            if (
+                self.rect.x // self.block_size,
+                self.rect.y // self.block_size + 1,
+            ) not in occupied_blocks:
+                self.rect.top += self.block_size
+        if self.angle == 270:
+            if (
+                self.rect.x // self.block_size + 1,
+                self.rect.y // self.block_size,
+            ) not in occupied_blocks:
+                self.rect.left += self.block_size
+
+    def rotate(self, direction):
+        if direction == "left":
+            self.angle = (self.angle + 90) % 360
+            self.surf = pygame.transform.rotate(self.origin_surf, self.angle)
+        elif direction == "right":
+            self.angle = (self.angle - 90) % 360
+            self.surf = pygame.transform.rotate(self.origin_surf, self.angle)
+
     def move_up(self):
         if self.rect.y == self.block_size:
             return

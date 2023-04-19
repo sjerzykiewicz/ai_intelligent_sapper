@@ -34,9 +34,8 @@ class Game:
             self.WINDOW_WIDTH // self.BLOCK_SIZE,
             self.WINDOW_HEIGHT // self.BLOCK_SIZE,
         )
-        self.is_landmine_here = [
-            [False for col in range(columns)] for row in range(rows)
-        ]
+        self.is_landmine_here = [[False for _ in range(columns)] for _ in range(rows)]
+        self.occupied_blocks = set()
 
     def run(self):
         while True:
@@ -53,6 +52,12 @@ class Game:
                 sys.exit()
 
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    self.sapper.move_forward(self.occupied_blocks)
+                if event.key == pygame.K_LEFT:
+                    self.sapper.rotate("left")
+                if event.key == pygame.K_RIGHT:
+                    self.sapper.rotate("right")
                 if event.key == pygame.K_w:
                     self.sapper.move_up()
                 if event.key == pygame.K_s:
@@ -68,8 +73,11 @@ class Game:
             y //= self.BLOCK_SIZE
             if mouse_pressed[0]:
                 self.is_landmine_here[x][y] = True
+                self.occupied_blocks.add((x, y))
 
             if mouse_pressed[2]:
+                if self.is_landmine_here[x][y]:
+                    self.occupied_blocks.remove((x, y))
                 self.is_landmine_here[x][y] = False
 
     def _game_logic(self):
@@ -119,6 +127,14 @@ class Game:
             self.screen.blit(fence_vertical, (0, y))
             self.screen.blit(fence_vertical, (self.WINDOW_WIDTH - self.BLOCK_SIZE, y))
 
+            self.occupied_blocks.add((0, y // self.BLOCK_SIZE))
+            self.occupied_blocks.add(
+                (
+                    (self.WINDOW_WIDTH - self.BLOCK_SIZE) // self.BLOCK_SIZE,
+                    y // self.BLOCK_SIZE,
+                )
+            )
+
         for x in range(
             self.BLOCK_SIZE, self.WINDOW_WIDTH - self.BLOCK_SIZE, self.BLOCK_SIZE
         ):
@@ -127,10 +143,32 @@ class Game:
                 fence_horizontal, (x, self.WINDOW_HEIGHT - self.BLOCK_SIZE)
             )
 
+            self.occupied_blocks.add((x // self.BLOCK_SIZE, 0))
+            self.occupied_blocks.add(
+                (
+                    x // self.BLOCK_SIZE,
+                    (self.WINDOW_HEIGHT - self.BLOCK_SIZE) // self.BLOCK_SIZE,
+                )
+            )
+
         self.screen.blit(fence_corner_1, (0, 0))
         self.screen.blit(fence_corner_2, (self.WINDOW_WIDTH - self.BLOCK_SIZE, 0))
         self.screen.blit(fence_corner_3, (0, self.WINDOW_HEIGHT - self.BLOCK_SIZE))
         self.screen.blit(
             fence_corner_4,
             (self.WINDOW_WIDTH - self.BLOCK_SIZE, self.WINDOW_HEIGHT - self.BLOCK_SIZE),
+        )
+
+        self.occupied_blocks.add((0, 0))
+        self.occupied_blocks.add(
+            ((self.WINDOW_WIDTH - self.BLOCK_SIZE) // self.BLOCK_SIZE, 0)
+        )
+        self.occupied_blocks.add(
+            (0, (self.WINDOW_HEIGHT - self.BLOCK_SIZE) // self.BLOCK_SIZE)
+        )
+        self.occupied_blocks.add(
+            (
+                (self.WINDOW_WIDTH - self.BLOCK_SIZE) // self.BLOCK_SIZE,
+                (self.WINDOW_HEIGHT - self.BLOCK_SIZE) // self.BLOCK_SIZE,
+            )
         )
