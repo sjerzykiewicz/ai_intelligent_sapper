@@ -82,6 +82,8 @@ class Game:
 
     def _game_logic(self):
         sapper_x, sapper_y = self.sapper.get_pos()
+        if self.is_landmine_here[sapper_x][sapper_y]:
+            self.occupied_blocks.remove((sapper_x, sapper_y))
         self.is_landmine_here[sapper_x][sapper_y] = False
 
     def _draw_screen(self):
