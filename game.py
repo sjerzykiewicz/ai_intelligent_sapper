@@ -22,6 +22,7 @@ class Game:
 
         unpaved_road_path = "gfx/surfaces/unpaved_road.png"
         self.unpaved_road_surf = pygame.image.load(unpaved_road_path).convert_alpha()
+        self.to_visualize = []
 
         landmine_path = "gfx/bombs/landmine.png"
         self.landmine_surf = pygame.image.load(landmine_path).convert_alpha()
@@ -40,8 +41,6 @@ class Game:
             (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
             self.occupied_blocks,
         )
-
-        self.to_visualize = []
 
     def run(self):
         while True:
@@ -65,13 +64,7 @@ class Game:
                 if event.key == pygame.K_RIGHT:
                     self.sapper.rotate("right")
                 if event.key == pygame.K_w:
-                    self.to_visualize = self.sapper.move_up()
-                if event.key == pygame.K_s:
-                    self.sapper.move_down()
-                if event.key == pygame.K_a:
-                    self.sapper.move_left()
-                if event.key == pygame.K_d:
-                    self.sapper.move_right()
+                    self.to_visualize = self.sapper.find_path()
 
             mouse_pressed = pygame.mouse.get_pressed()
             x, y = pygame.mouse.get_pos()
@@ -182,8 +175,6 @@ class Game:
             )
         )
 
-    # define a _visualize_path function that will take coordinates from self.to_visualize
-    # and draw a path from the sapper to the destination block
     def _visualize_path(self):
         if not self.to_visualize:
             return

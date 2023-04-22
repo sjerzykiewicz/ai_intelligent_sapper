@@ -50,46 +50,13 @@ class Sapper:
             self.angle = (self.angle - 90) % 360
             self.surf = pygame.transform.rotate(self.origin_surf, self.angle)
 
-    def move_up(self):
+    def find_path(self):
         x = self.rect.x // self.block_size
         y = self.rect.y // self.block_size
-        path = self._find_path((x, y, self.angle), (1, 1))
+        source = (x, y, self.angle)
+        goal = (1, 1, 0)
+        path = self._search_state_space(source, goal)
         return path
-
-        if self.rect.y == self.block_size:
-            return
-
-        self.rect.top -= self.block_size
-        if self.angle != 0:
-            self.surf = self.origin_surf
-            self.angle = 0
-
-    def move_down(self):
-        if self.rect.y == self.win_y - 2 * self.block_size:
-            return
-
-        self.rect.top += self.block_size
-        if self.angle != 180:
-            self.surf = pygame.transform.rotate(self.origin_surf, 180)
-            self.angle = 180
-
-    def move_right(self):
-        if self.rect.x == self.win_x - 2 * self.block_size:
-            return
-
-        self.rect.left += self.block_size
-        if self.angle != 270:
-            self.surf = pygame.transform.rotate(self.origin_surf, 270)
-            self.angle = 270
-
-    def move_left(self):
-        if self.rect.x == self.block_size:
-            return
-
-        self.rect.left -= self.block_size
-        if self.angle != 90:
-            self.surf = pygame.transform.rotate(self.origin_surf, 90)
-            self.angle = 90
 
     def get_surf(self):
         return self.surf
@@ -100,42 +67,39 @@ class Sapper:
     def get_pos(self):
         return self.rect.x // self.block_size, self.rect.y // self.block_size
     
-    def _find_path(self, initial_state, goal_state):
+    def _search_state_space(self, initial_state, goal_state):
         queue = deque()
         visited_states = set()
+        x_end, y_end, _ = goal_state
         queue.append((initial_state, []))
         while queue:
             cur_state, path = queue.popleft()
             x, y, angle = cur_state
             if (x, y, angle) not in visited_states:
                 visited_states.add((x, y, angle))
-                if (x, y) == goal_state:
+                if (x, y) == (x_end, y_end):
                     return path
                 else:
-                    for neighbor in self._get_neighbor_states(cur_state):
+                    for neighbor in self._get_succesor_states(cur_state):
                         queue.append((neighbor, path + [neighbor]))
         return None
     
-    def _get_neighbor_states(self, state):
-        # the neighbor states can be either going forward (make sure they're not in the self.occupied_blocks) or making a turn left or right
-        # the state is a tuple of (x, y, angle)
+    def _get_succesor_states(self, state):
         x, y, angle = state
-        neighbors = []
-        # the robot can only go forward
+        successors = []
         if angle == 0:
             if (x, y - 1) not in self.occupied_blocks:
-                neighbors.append((x, y - 1, 0))
+                successors.append((x, y - 1, 0))
         elif angle == 90:
             if (x - 1, y) not in self.occupied_blocks:
-                neighbors.append((x - 1, y, 90))
+                successors.append((x - 1, y, 90))
         elif angle == 180:
             if (x, y + 1) not in self.occupied_blocks:
-                neighbors.append((x, y + 1, 180))
+                successors.append((x, y + 1, 180))
         elif angle == 270:
             if (x + 1, y) not in self.occupied_blocks:
-                neighbors.append((x + 1, y, 270))
+                successors.append((x + 1, y, 270))
         
-        # the robot can turn left or right
-        neighbors.append((x, y, (angle + 90) % 360))
-        neighbors.append((x, y, (angle - 90) % 360))
-        return neighbors
+        successors.append((x, y, (angle + 90) % 360))
+        successors.append((x, y, (angle - 90) % 360))
+        return successors
