@@ -102,13 +102,13 @@ class Sapper:
     
     def _find_path(self, initial_state, goal_state):
         queue = deque()
-        visited_nodes = set()
+        visited_states = set()
         queue.append((initial_state, []))
         while queue:
             cur_state, path = queue.popleft()
             x, y, angle = cur_state
-            if (x, y, angle) not in visited_nodes:
-                visited_nodes.add((x, y, angle))
+            if (x, y, angle) not in visited_states:
+                visited_states.add((x, y, angle))
                 if (x, y) == goal_state:
                     return path
                 else:
