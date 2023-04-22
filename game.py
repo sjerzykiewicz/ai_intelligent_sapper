@@ -20,13 +20,8 @@ class Game:
         self.grass_surf = pygame.image.load(grass_path).convert_alpha()
         self.rects = self._create_grid_rects()
 
-        sapper_path = "gfx/sapper/sapper.png"
-        self.sapper = Sapper(
-            (576, 672),
-            sapper_path,
-            self.BLOCK_SIZE,
-            (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
-        )
+        unpaved_road_path = "gfx/surfaces/unpaved_road.png"
+        self.unpaved_road_surf = pygame.image.load(unpaved_road_path).convert_alpha()
 
         landmine_path = "gfx/bombs/landmine.png"
         self.landmine_surf = pygame.image.load(landmine_path).convert_alpha()
@@ -36,6 +31,17 @@ class Game:
         )
         self.is_landmine_here = [[False for _ in range(columns)] for _ in range(rows)]
         self.occupied_blocks = set()
+
+        sapper_path = "gfx/sapper/sapper.png"
+        self.sapper = Sapper(
+            (576, 672),
+            sapper_path,
+            self.BLOCK_SIZE,
+            (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
+            self.occupied_blocks,
+        )
+
+        self.to_visualize = []
 
     def run(self):
         while True:
@@ -53,13 +59,13 @@ class Game:
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
-                    self.sapper.move_forward(self.occupied_blocks)
+                    self.sapper.move_forward()
                 if event.key == pygame.K_LEFT:
                     self.sapper.rotate("left")
                 if event.key == pygame.K_RIGHT:
                     self.sapper.rotate("right")
                 if event.key == pygame.K_w:
-                    self.sapper.move_up()
+                    self.to_visualize = self.sapper.move_up()
                 if event.key == pygame.K_s:
                     self.sapper.move_down()
                 if event.key == pygame.K_a:
@@ -91,6 +97,7 @@ class Game:
         self._draw_grid()
         self._draw_landmines()
         self._draw_fence()
+        self._visualize_path()
         self.screen.blit(self.sapper.get_surf(), self.sapper.get_rect())
 
         pygame.display.update()
@@ -174,3 +181,14 @@ class Game:
                 (self.WINDOW_HEIGHT - self.BLOCK_SIZE) // self.BLOCK_SIZE,
             )
         )
+
+    # define a _visualize_path function that will take coordinates from self.to_visualize
+    # and draw a path from the sapper to the destination block
+    def _visualize_path(self):
+        if not self.to_visualize:
+            return
+        for block in self.to_visualize:
+            x, y = block[0] * self.BLOCK_SIZE, block[1] * self.BLOCK_SIZE
+
+            road_rect = self.unpaved_road_surf.get_rect(topleft=(x, y))
+            self.screen.blit(self.unpaved_road_surf, road_rect)
