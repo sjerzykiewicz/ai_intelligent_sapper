@@ -36,6 +36,7 @@ class Game:
         self.laser_corner_4.set_alpha(128)
         self.to_visualize = []
         self.to_visualize_done = False
+        self.toggle_animation = False
 
         landmine_path = "gfx/bombs/landmine.png"
         self.landmine_surf = pygame.image.load(landmine_path).convert_alpha()
@@ -87,6 +88,8 @@ class Game:
                     x //= self.BLOCK_SIZE
                     y //= self.BLOCK_SIZE
                     self.sapper.change_goal((x, y, 0))
+                if event.key == pygame.K_a:
+                    self.toggle_animation = not self.toggle_animation
 
             mouse_pressed = pygame.mouse.get_pressed()
             x, y = pygame.mouse.get_pos()
@@ -265,45 +268,53 @@ class Game:
                 if rot == next_rot:
                     self.screen.blit(laser_surf, laser_rect)
             return
+        if self.toggle_animation:
+            for i in range(1, len(self.to_visualize) - 1):
+                x, y, rot = (
+                    self.to_visualize[i][0] * self.BLOCK_SIZE,
+                    self.to_visualize[i][1] * self.BLOCK_SIZE,
+                    self.to_visualize[i][2],
+                )
+                last_x, last_rot = (
+                    self.to_visualize[i - 1][0] * self.BLOCK_SIZE,
+                    self.to_visualize[i - 1][2],
+                )
 
-        for i in range(1, len(self.to_visualize) - 1):
-            x, y, rot = (
-                self.to_visualize[i][0] * self.BLOCK_SIZE,
-                self.to_visualize[i][1] * self.BLOCK_SIZE,
-                self.to_visualize[i][2],
-            )
-            last_x, last_rot = (
-                self.to_visualize[i - 1][0] * self.BLOCK_SIZE,
-                self.to_visualize[i - 1][2],
-            )
+                next_rot = self.to_visualize[i + 1][2]
 
-            next_rot = self.to_visualize[i + 1][2]
+                laser_rect = self.laser_vertical.get_rect(topleft=(x, y))
+                laser_surf = self.laser_vertical
 
-            laser_rect = self.laser_vertical.get_rect(topleft=(x, y))
-            laser_surf = self.laser_vertical
+                if last_x != x:
+                    laser_rect = self.laser_horizontal.get_rect(topleft=(x, y))
+                    laser_surf = self.laser_horizontal
 
-            if last_x != x:
-                laser_rect = self.laser_horizontal.get_rect(topleft=(x, y))
-                laser_surf = self.laser_horizontal
+                if rot != last_rot:
+                    if (rot == 180 and last_rot == 90) or (
+                        rot == 270 and last_rot == 0
+                    ):
+                        laser_rect = self.laser_corner_1.get_rect(topleft=(x, y))
+                        laser_surf = self.laser_corner_1
+                    if (rot == 90 and last_rot == 0) or (
+                        rot == 180 and last_rot == 270
+                    ):
+                        laser_rect = self.laser_corner_2.get_rect(topleft=(x, y))
+                        laser_surf = self.laser_corner_2
+                    if (rot == 0 and last_rot == 90) or (
+                        rot == 270 and last_rot == 180
+                    ):
+                        laser_rect = self.laser_corner_3.get_rect(topleft=(x, y))
+                        laser_surf = self.laser_corner_3
+                    if (rot == 0 and last_rot == 270) or (
+                        rot == 90 and last_rot == 180
+                    ):
+                        laser_rect = self.laser_corner_4.get_rect(topleft=(x, y))
+                        laser_surf = self.laser_corner_4
+                if rot == next_rot:
+                    self.screen.blit(laser_surf, laser_rect)
 
-            if rot != last_rot:
-                if (rot == 180 and last_rot == 90) or (rot == 270 and last_rot == 0):
-                    laser_rect = self.laser_corner_1.get_rect(topleft=(x, y))
-                    laser_surf = self.laser_corner_1
-                if (rot == 90 and last_rot == 0) or (rot == 180 and last_rot == 270):
-                    laser_rect = self.laser_corner_2.get_rect(topleft=(x, y))
-                    laser_surf = self.laser_corner_2
-                if (rot == 0 and last_rot == 90) or (rot == 270 and last_rot == 180):
-                    laser_rect = self.laser_corner_3.get_rect(topleft=(x, y))
-                    laser_surf = self.laser_corner_3
-                if (rot == 0 and last_rot == 270) or (rot == 90 and last_rot == 180):
-                    laser_rect = self.laser_corner_4.get_rect(topleft=(x, y))
-                    laser_surf = self.laser_corner_4
-            if rot == next_rot:
-                self.screen.blit(laser_surf, laser_rect)
-
-            pygame.display.update(laser_rect)
-            pygame.time.wait(50)
+                pygame.display.update(laser_rect)
+                pygame.time.wait(50)
         self.to_visualize_done = True
 
     def _draw_goal(self):
