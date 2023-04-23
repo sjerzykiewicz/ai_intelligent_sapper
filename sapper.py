@@ -83,8 +83,8 @@ class Sapper:
                 if (x, y) == (x_end, y_end):
                     return path
                 else:
-                    for neighbor in self._get_succesor_states(cur_state):
-                        queue.append((neighbor, path + [neighbor]))
+                    for next_state in self._get_succesor_states(cur_state):
+                        queue.append((next_state, path + [next_state]))
         return None
 
     def _get_succesor_states(self, state):
