@@ -67,6 +67,9 @@ class Sapper:
     def get_pos(self):
         return self.rect.x // self.block_size, self.rect.y // self.block_size
 
+    def get_angle(self):
+        return self.angle
+
     def _search_state_space(self, initial_state, goal_state):
         queue = deque()
         visited_states = set()

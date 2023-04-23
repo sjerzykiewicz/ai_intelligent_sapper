@@ -83,6 +83,9 @@ class Game:
                 if event.key == pygame.K_w:
                     self.to_visualize = self.sapper.find_path()
                     self.to_visualize_done = False
+                if event.key == pygame.K_g:
+                    if self.to_visualize:
+                        self._auto_sapper_move()
                 if event.key == pygame.K_s:
                     x, y = pygame.mouse.get_pos()
                     x //= self.BLOCK_SIZE
@@ -117,9 +120,12 @@ class Game:
         self._draw_fence()
         self._visualize_path()
         self._draw_goal()
-        self.screen.blit(self.sapper.get_surf(), self.sapper.get_rect())
+        self._draw_sapper()
 
         pygame.display.update()
+
+    def _draw_sapper(self):
+        self.screen.blit(self.sapper.get_surf(), self.sapper.get_rect())
 
     def _draw_landmines(self):
         for row in range(len(self.is_landmine_here)):
@@ -323,3 +329,23 @@ class Game:
         if (goal[0], goal[1]) not in self.occupied_blocks:
             flag_rect = self.flag_surf.get_rect(topleft=(x, y))
             self.screen.blit(self.flag_surf, flag_rect)
+
+    def _auto_sapper_move(self):
+        last_tick = pygame.time.get_ticks()
+        for block in self.to_visualize:
+            if self.sapper.get_angle() != block[2]:
+                while self.sapper.get_angle() != block[2]:
+                    if self.sapper.get_angle() - block[2] == 90:
+                        self.sapper.rotate("right")
+
+                    else:
+                        self.sapper.rotate("left")
+                continue
+
+            self.sapper.move_forward()
+            pygame.display.update()
+            self._draw_sapper()
+            while True:
+                if pygame.time.get_ticks() - last_tick >= 20:
+                    last_tick = pygame.time.get_ticks()
+                    break
