@@ -275,6 +275,7 @@ class Game:
                     self.screen.blit(laser_surf, laser_rect)
             return
         if self.toggle_animation:
+            last_tick = pygame.time.get_ticks()
             for i in range(1, len(self.to_visualize) - 1):
                 x, y, rot = (
                     self.to_visualize[i][0] * self.BLOCK_SIZE,
@@ -320,7 +321,10 @@ class Game:
                     self.screen.blit(laser_surf, laser_rect)
 
                 pygame.display.update(laser_rect)
-                pygame.time.wait(50)
+                while True:
+                    if pygame.time.get_ticks() - last_tick >= 20:
+                        last_tick = pygame.time.get_ticks()
+                        break
         self.to_visualize_done = True
 
     def _draw_goal(self):
