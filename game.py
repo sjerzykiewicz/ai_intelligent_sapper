@@ -86,6 +86,7 @@ class Game:
                 if event.key == pygame.K_g:
                     if self.to_visualize:
                         self._auto_sapper_move()
+                        self.to_visualize = False
                 if event.key == pygame.K_s:
                     x, y = pygame.mouse.get_pos()
                     x //= self.BLOCK_SIZE
