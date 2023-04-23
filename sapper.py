@@ -15,6 +15,7 @@ class Sapper:
         self.block_size = block_size
         self.win_x, self.win_y = win_size
         self.angle = 0
+        self.goal = (1, 1, 0)
 
     def move_forward(self):
         if self.angle == 0:
@@ -54,8 +55,7 @@ class Sapper:
         x = self.rect.x // self.block_size
         y = self.rect.y // self.block_size
         source = (x, y, self.angle)
-        goal = (1, 1, 0)
-        path = self._search_state_space(source, goal)
+        path = self._search_state_space(source, self.goal)
         return path
 
     def get_surf(self):
@@ -103,3 +103,9 @@ class Sapper:
         successors.append((x, y, (angle + 90) % 360))
         successors.append((x, y, (angle - 90) % 360))
         return successors
+
+    def get_goal(self):
+        return self.goal
+
+    def change_goal(self, new_goal):
+        self.goal = new_goal

@@ -55,6 +55,9 @@ class Game:
             self.occupied_blocks,
         )
 
+        self.flag_path = "gfx/flags/flag.png"
+        self.flag_surf = pygame.image.load(self.flag_path).convert_alpha()
+
     def run(self):
         while True:
             self._handle_events()
@@ -79,6 +82,11 @@ class Game:
                 if event.key == pygame.K_w:
                     self.to_visualize = self.sapper.find_path()
                     self.to_visualize_done = False
+                if event.key == pygame.K_s:
+                    x, y = pygame.mouse.get_pos()
+                    x //= self.BLOCK_SIZE
+                    y //= self.BLOCK_SIZE
+                    self.sapper.change_goal((x, y, 0))
 
             mouse_pressed = pygame.mouse.get_pressed()
             x, y = pygame.mouse.get_pos()
@@ -105,6 +113,7 @@ class Game:
         self._draw_landmines()
         self._draw_fence()
         self._visualize_path()
+        self._draw_goal()
         self.screen.blit(self.sapper.get_surf(), self.sapper.get_rect())
 
         pygame.display.update()
@@ -296,3 +305,10 @@ class Game:
             pygame.display.update(laser_rect)
             pygame.time.wait(50)
         self.to_visualize_done = True
+
+    def _draw_goal(self):
+        goal = self.sapper.get_goal()
+        x, y = goal[0] * self.BLOCK_SIZE, goal[1] * self.BLOCK_SIZE
+        if (goal[0], goal[1]) not in self.occupied_blocks:
+            flag_rect = self.flag_surf.get_rect(topleft=(x, y))
+            self.screen.blit(self.flag_surf, flag_rect)
