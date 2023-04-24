@@ -351,12 +351,8 @@ class Game:
                 continue
 
             self.sapper.move_forward()
-            self._draw_grid()
-            self._draw_landmines()
-            self._draw_fence()
-            self._draw_goal()
 
-            self._draw_sapper()
+            self._draw_screen()
             pygame.display.update()
 
             while True:
