@@ -337,6 +337,9 @@ class Game:
 
     def _auto_sapper_move(self):
         last_tick = pygame.time.get_ticks()
+
+        x, y = self.sapper.get_pos()
+
         for block in self.to_visualize:
             if self.sapper.get_angle() != block[2]:
                 while self.sapper.get_angle() != block[2]:
@@ -348,9 +351,15 @@ class Game:
                 continue
 
             self.sapper.move_forward()
-            pygame.display.update()
+            self._draw_grid()
+            self._draw_landmines()
+            self._draw_fence()
+            self._draw_goal()
+
             self._draw_sapper()
+            pygame.display.update()
+
             while True:
-                if pygame.time.get_ticks() - last_tick >= 20:
+                if pygame.time.get_ticks() - last_tick >= 50:
                     last_tick = pygame.time.get_ticks()
                     break
