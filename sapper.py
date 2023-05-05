@@ -1,5 +1,6 @@
 import pygame
 from collections import deque
+from bfs_state import BFSState
 
 
 class Sapper:
@@ -55,8 +56,13 @@ class Sapper:
         x = self.rect.x // self.block_size
         y = self.rect.y // self.block_size
         source = (x, y, self.angle)
-        path = self._search_state_space(source, self.goal)
-        return path
+        end_state = self._search_state_space(source, self.goal)
+        path = []
+        while not end_state.is_initial:
+            path.append(end_state.action)
+            end_state = end_state.parent
+
+        return path[::-1]
 
     def get_surf(self):
         return self.surf
@@ -73,38 +79,40 @@ class Sapper:
     def _search_state_space(self, initial_state, goal_state):
         queue = deque()
         visited_states = set()
+        x_start, y_start, angle_state = initial_state
         x_end, y_end, _ = goal_state
-        queue.append((initial_state, []))
+        queue.append(BFSState(x_start, y_start, angle_state, None, None, True))
         while queue:
-            cur_state, path = queue.popleft()
-            x, y, angle = cur_state
+            cur_state = queue.popleft()
+            x, y, angle = cur_state.x, cur_state.y, cur_state.angle
             if (x, y, angle) not in visited_states:
                 visited_states.add((x, y, angle))
                 if (x, y) == (x_end, y_end):
-                    return path
+                    return cur_state
                 else:
                     for next_state in self._get_succesor_states(cur_state):
-                        queue.append((next_state, path + [next_state]))
-        return None
+                        queue.append((next_state))
+        return BFSState(x_start, y_start, angle_state, None, None, True)
 
     def _get_succesor_states(self, state):
-        x, y, angle = state
+        x, y, angle = state.x, state.y, state.angle
         successors = []
+        forward = "F"
         if angle == 0:
             if (x, y - 1) not in self.occupied_blocks:
-                successors.append((x, y - 1, 0))
+                successors.append(BFSState(x, y - 1, 0, state, forward))
         elif angle == 90:
             if (x - 1, y) not in self.occupied_blocks:
-                successors.append((x - 1, y, 90))
+                successors.append(BFSState(x - 1, y, 90, state, forward))
         elif angle == 180:
             if (x, y + 1) not in self.occupied_blocks:
-                successors.append((x, y + 1, 180))
+                successors.append(BFSState(x, y + 1, 180, state, forward))
         elif angle == 270:
             if (x + 1, y) not in self.occupied_blocks:
-                successors.append((x + 1, y, 270))
+                successors.append(BFSState(x + 1, y, 270, state, forward))
 
-        successors.append((x, y, (angle + 90) % 360))
-        successors.append((x, y, (angle - 90) % 360))
+        successors.append(BFSState(x, y, (angle + 90) % 360, state, "L"))
+        successors.append(BFSState(x, y, (angle - 90) % 360, state, "R"))
         return successors
 
     def get_goal(self):
