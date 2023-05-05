@@ -62,7 +62,6 @@ class Sapper:
             path.append(end_state.action)
             end_state = end_state.parent
 
-        print(path)
         return path[::-1]
 
     def get_surf(self):
