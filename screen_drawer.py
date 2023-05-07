@@ -21,7 +21,7 @@ class ScreenDrawer:
         self.occupied_blocks = occupied_blocks
         self.fence = fence
 
-    def draw(self):
+    def draw_screen(self):
         self._draw_screen()
 
     def _draw_screen(self):

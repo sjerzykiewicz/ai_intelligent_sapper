@@ -2,7 +2,6 @@ import pygame
 from sapper import Sapper
 import sys
 from screen_drawer import ScreenDrawer
-from threading import Thread
 
 
 class Game:
@@ -57,7 +56,7 @@ class Game:
     def run(self):
         while True:
             self._handle_events()
-            self.screen_drawer.draw()
+            self.screen_drawer.draw_screen()
             self._game_logic()
             self.clock.tick(60)
 
@@ -101,6 +100,7 @@ class Game:
     def _game_logic(self):
         pass
 
+    # this method is called only once during the initialization of the game
     def _create_grid_rects(self):
         rects = []
         for x in range(0, self.WINDOW_WIDTH, self.BLOCK_SIZE):
@@ -109,6 +109,7 @@ class Game:
                 rects.append(rect)
         return rects
 
+    # this method is called only once during the initialization of the game
     def _create_fence(self):
 
         fence = []

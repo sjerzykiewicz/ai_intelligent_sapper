@@ -136,7 +136,7 @@ class Sapper:
             else:
                 self.move_forward()
 
-            screen_drawer.draw()
+            screen_drawer.draw_screen()
 
             while True:
                 if pygame.time.get_ticks() - last_tick >= 50:
