@@ -5,8 +5,22 @@ class ScreenDrawer:
     BLACK = (0, 0, 0)
     WHITE = (200, 200, 200)
 
-    def __init__(self, sapper, screen, clock, grass_surf, rects, landmine_surf, flag_surf, BLOCK_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT, is_landmine_here, occupied_blocks, fence):
-        
+    def __init__(
+        self,
+        sapper,
+        screen,
+        clock,
+        grass_surf,
+        rects,
+        landmine_surf,
+        flag_surf,
+        BLOCK_SIZE,
+        WINDOW_WIDTH,
+        WINDOW_HEIGHT,
+        is_landmine_here,
+        occupied_blocks,
+        fence,
+    ):
         self.sapper = sapper
         self.screen = screen
         self.clock = clock
