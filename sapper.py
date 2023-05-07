@@ -52,7 +52,11 @@ class Sapper:
             self.angle = (self.angle - 90) % 360
             self.surf = pygame.transform.rotate(self.origin_surf, self.angle)
 
-    def find_path(self):
+    def auto_move(self, screen_drawer):
+        path = self._find_path()
+        self._auto_sapper_move(path, screen_drawer)
+
+    def _find_path(self):
         x = self.rect.x // self.block_size
         y = self.rect.y // self.block_size
         source = (x, y, self.angle)
@@ -120,3 +124,21 @@ class Sapper:
 
     def change_goal(self, new_goal):
         self.goal = new_goal
+
+    def _auto_sapper_move(self, actions, screen_drawer):
+        last_tick = pygame.time.get_ticks()
+
+        for action in actions:
+            if action == "L":
+                self.rotate("left")
+            elif action == "R":
+                self.rotate("right")
+            else:
+                self.move_forward()
+
+            screen_drawer.draw()
+
+            while True:
+                if pygame.time.get_ticks() - last_tick >= 50:
+                    last_tick = pygame.time.get_ticks()
+                    break
