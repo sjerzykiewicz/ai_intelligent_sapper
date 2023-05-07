@@ -5,7 +5,7 @@ class ScreenDrawer:
     BLACK = (0, 0, 0)
     WHITE = (200, 200, 200)
 
-    def __init__(self, sapper, screen, clock, grass_surf, rects, landmine_surf, flag_surf, BLOCK_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT, is_landmine_here, occupied_blocks):
+    def __init__(self, sapper, screen, clock, grass_surf, rects, landmine_surf, flag_surf, BLOCK_SIZE, WINDOW_WIDTH, WINDOW_HEIGHT, is_landmine_here, occupied_blocks, fence):
         
         self.sapper = sapper
         self.screen = screen
@@ -19,13 +19,7 @@ class ScreenDrawer:
         self.WINDOW_HEIGHT = WINDOW_HEIGHT
         self.is_landmine_here = is_landmine_here
         self.occupied_blocks = occupied_blocks
-
-        self.fence_vertical = pygame.image.load("gfx/fence/fence_1.png").convert_alpha()
-        self.fence_horizontal = pygame.image.load("gfx/fence/fence_2.png").convert_alpha()
-        self.fence_corner_1 = pygame.image.load("gfx/fence/fence_3.png").convert_alpha()
-        self.fence_corner_2 = pygame.image.load("gfx/fence/fence_4.png").convert_alpha()
-        self.fence_corner_3 = pygame.image.load("gfx/fence/fence_5.png").convert_alpha()
-        self.fence_corner_4 = pygame.image.load("gfx/fence/fence_6.png").convert_alpha()
+        self.fence = fence
 
     def draw(self):
         self._draw_screen()
@@ -64,28 +58,8 @@ class ScreenDrawer:
             self.screen.blit(self.grass_surf, rect)
 
     def _draw_fence(self):
-
-        for y in range(
-            self.BLOCK_SIZE, self.WINDOW_HEIGHT - self.BLOCK_SIZE, self.BLOCK_SIZE
-        ):
-            self.screen.blit(self.fence_vertical, (0, y))
-            self.screen.blit(self.fence_vertical, (self.WINDOW_WIDTH - self.BLOCK_SIZE, y))
-
-        for x in range(
-            self.BLOCK_SIZE, self.WINDOW_WIDTH - self.BLOCK_SIZE, self.BLOCK_SIZE
-        ):
-            self.screen.blit(self.fence_horizontal, (x, 0))
-            self.screen.blit(
-                self.fence_horizontal, (x, self.WINDOW_HEIGHT - self.BLOCK_SIZE)
-            )
-
-        self.screen.blit(self.fence_corner_1, (0, 0))
-        self.screen.blit(self.fence_corner_2, (self.WINDOW_WIDTH - self.BLOCK_SIZE, 0))
-        self.screen.blit(self.fence_corner_3, (0, self.WINDOW_HEIGHT - self.BLOCK_SIZE))
-        self.screen.blit(
-            self.fence_corner_4,
-            (self.WINDOW_WIDTH - self.BLOCK_SIZE, self.WINDOW_HEIGHT - self.BLOCK_SIZE),
-        )
+        for fence, rect in self.fence:
+            self.screen.blit(fence, rect)
 
     def _draw_goal(self):
         goal = self.sapper.get_goal()
