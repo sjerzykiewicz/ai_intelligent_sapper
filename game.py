@@ -103,14 +103,15 @@ class Game:
             x //= self.BLOCK_SIZE
             y //= self.BLOCK_SIZE
             if mouse_pressed[0]:
-                if (x, y) not in self.occupied_blocks:
+                if (x, y) not in self.occupied_blocks and 0 <= x < self.WINDOW_WIDTH // self.BLOCK_SIZE and 0 <= y < self.WINDOW_HEIGHT // self.BLOCK_SIZE:
                     self.is_landmine_here[x][y] = True
                     self.occupied_blocks.add((x, y))
 
             if mouse_pressed[2]:
-                if self.is_landmine_here[x][y]:
-                    self.occupied_blocks.remove((x, y))
-                self.is_landmine_here[x][y] = False
+                if 0 <= x < self.WINDOW_WIDTH // self.BLOCK_SIZE and 0 <= y < self.WINDOW_HEIGHT // self.BLOCK_SIZE:
+                    if self.is_landmine_here[x][y]:
+                        self.occupied_blocks.remove((x, y))
+                    self.is_landmine_here[x][y] = False
 
     def _game_logic(self):
         pass
