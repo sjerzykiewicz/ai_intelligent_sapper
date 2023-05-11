@@ -79,8 +79,8 @@ class Sapper:
 
     def _get_slowing_power(self):
         slowing_power = [
-            [None for _ in range(len(self.surfaces_types))]
-            for _ in range(len(self.surfaces_types[0]))
+            [None for _ in range(len(self.surfaces_types[0]))]
+            for _ in range(len(self.surfaces_types))
         ]
         for i in range(len(slowing_power)):
             for j in range(len(slowing_power[0])):
@@ -90,6 +90,7 @@ class Sapper:
                     slowing_power[i][j] = 5
                 elif self.surfaces_types[i][j] == "sand":
                     slowing_power[i][j] = 25
+        return slowing_power
 
     def _find_path_bfs(self):
         x = self.rect.x // self.block_size
