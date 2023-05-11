@@ -10,8 +10,7 @@ class ScreenDrawer:
         sapper,
         screen,
         clock,
-        grass_surf,
-        rects,
+        surfaces,
         landmine_surf,
         flag_surf,
         BLOCK_SIZE,
@@ -24,8 +23,7 @@ class ScreenDrawer:
         self.sapper = sapper
         self.screen = screen
         self.clock = clock
-        self.grass_surf = grass_surf
-        self.rects = rects
+        self.surfaces = surfaces
         self.landmine_surf = landmine_surf
         self.flag_surf = flag_surf
         self.BLOCK_SIZE = BLOCK_SIZE
@@ -59,17 +57,9 @@ class ScreenDrawer:
                     bomb_rect = self.landmine_surf.get_rect(topleft=(x, y))
                     self.screen.blit(self.landmine_surf, bomb_rect)
 
-    def _create_grid_rects(self):
-        rects = []
-        for x in range(0, self.WINDOW_WIDTH, self.BLOCK_SIZE):
-            for y in range(0, self.WINDOW_HEIGHT, self.BLOCK_SIZE):
-                rect = self.grass_surf.get_rect(topleft=(x, y))
-                rects.append(rect)
-        return rects
-
     def _draw_grid(self):
-        for rect in self.rects:
-            self.screen.blit(self.grass_surf, rect)
+        for surface, rect in self.surfaces:
+            self.screen.blit(surface, rect)
 
     def _draw_fence(self):
         for fence, rect in self.fence:

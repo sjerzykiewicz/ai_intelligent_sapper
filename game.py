@@ -2,6 +2,7 @@ import pygame
 from sapper import Sapper
 import sys
 from screen_drawer import ScreenDrawer
+from random import randrange
 
 
 class Game:
@@ -19,7 +20,14 @@ class Game:
 
         grass_path = "gfx/surfaces/grass.png"
         self.grass_surf = pygame.image.load(grass_path).convert_alpha()
-        self.rects = self._create_grid_rects()
+
+        unpaved_road_path = "gfx/surfaces/unpaved_road.png"
+        self.unpaved_road_surf = pygame.image.load(unpaved_road_path).convert_alpha()
+
+        sand_path = "gfx/surfaces/sand.png"
+        self.sand_surf = pygame.image.load(sand_path).convert_alpha()
+
+        self.surfaces = self._create_grid_surfaces()
 
         landmine_path = "gfx/bombs/landmine.png"
         self.landmine_surf = pygame.image.load(landmine_path).convert_alpha()
@@ -56,8 +64,7 @@ class Game:
             self.sapper,
             self.screen,
             self.clock,
-            self.grass_surf,
-            self.rects,
+            self.surfaces,
             self.landmine_surf,
             self.flag_surf,
             self.BLOCK_SIZE,
@@ -103,12 +110,19 @@ class Game:
             x //= self.BLOCK_SIZE
             y //= self.BLOCK_SIZE
             if mouse_pressed[0]:
-                if (x, y) not in self.occupied_blocks and 0 <= x < self.WINDOW_WIDTH // self.BLOCK_SIZE and 0 <= y < self.WINDOW_HEIGHT // self.BLOCK_SIZE:
+                if (
+                    (x, y) not in self.occupied_blocks
+                    and 0 <= x < self.WINDOW_WIDTH // self.BLOCK_SIZE
+                    and 0 <= y < self.WINDOW_HEIGHT // self.BLOCK_SIZE
+                ):
                     self.is_landmine_here[x][y] = True
                     self.occupied_blocks.add((x, y))
 
             if mouse_pressed[2]:
-                if 0 <= x < self.WINDOW_WIDTH // self.BLOCK_SIZE and 0 <= y < self.WINDOW_HEIGHT // self.BLOCK_SIZE:
+                if (
+                    0 <= x < self.WINDOW_WIDTH // self.BLOCK_SIZE
+                    and 0 <= y < self.WINDOW_HEIGHT // self.BLOCK_SIZE
+                ):
                     if self.is_landmine_here[x][y]:
                         self.occupied_blocks.remove((x, y))
                     self.is_landmine_here[x][y] = False
@@ -117,13 +131,21 @@ class Game:
         pass
 
     # this method is called only once during the initialization of the game
-    def _create_grid_rects(self):
-        rects = []
+    def _create_grid_surfaces(self):
+        surfaces = []
         for x in range(0, self.WINDOW_WIDTH, self.BLOCK_SIZE):
             for y in range(0, self.WINDOW_HEIGHT, self.BLOCK_SIZE):
-                rect = self.grass_surf.get_rect(topleft=(x, y))
-                rects.append(rect)
-        return rects
+                rand_int = randrange(0, 3)
+                if rand_int == 0:
+                    rect = self.unpaved_road_surf.get_rect(topleft=(x, y))
+                    surfaces.append([self.unpaved_road_surf, rect])
+                elif rand_int == 1:
+                    rect = self.grass_surf.get_rect(topleft=(x, y))
+                    surfaces.append([self.grass_surf, rect])
+                elif rand_int == 2:
+                    rect = self.sand_surf.get_rect(topleft=(x, y))
+                    surfaces.append([self.sand_surf, rect])
+        return surfaces
 
     # this method is called only once during the initialization of the game
     def _create_fence(self):
