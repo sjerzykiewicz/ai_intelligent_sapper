@@ -27,7 +27,7 @@ class Game:
         sand_path = "gfx/surfaces/sand.png"
         self.sand_surf = pygame.image.load(sand_path).convert_alpha()
 
-        self.surfaces = self._create_grid_surfaces()
+        self.surfaces, self.surfaces_types = self._create_grid_surfaces()
 
         landmine_path = "gfx/bombs/landmine.png"
         self.landmine_surf = pygame.image.load(landmine_path).convert_alpha()
@@ -55,6 +55,7 @@ class Game:
             self.BLOCK_SIZE,
             (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
             self.occupied_blocks,
+            self.surfaces_types,
         )
 
         self.flag_path = "gfx/flags/flag.png"
@@ -96,8 +97,8 @@ class Game:
                     self.sapper.rotate("left")
                 if event.key == pygame.K_RIGHT:
                     self.sapper.rotate("right")
-                if event.key == pygame.K_g:
-                    self.sapper.auto_move(self.screen_drawer)
+                if event.key == pygame.K_b:
+                    self.sapper.auto_move_bfs(self.screen_drawer)
                 if event.key == pygame.K_s:
                     x, y = pygame.mouse.get_pos()
                     x //= self.BLOCK_SIZE
@@ -133,19 +134,28 @@ class Game:
     # this method is called only once during the initialization of the game
     def _create_grid_surfaces(self):
         surfaces = []
+        surfaces_types = [
+            [None for _ in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE)]
+            for _ in range(self.WINDOW_WIDTH // self.BLOCK_SIZE)
+        ]
         for x in range(0, self.WINDOW_WIDTH, self.BLOCK_SIZE):
             for y in range(0, self.WINDOW_HEIGHT, self.BLOCK_SIZE):
                 rand_int = randrange(0, 3)
                 if rand_int == 0:
                     rect = self.unpaved_road_surf.get_rect(topleft=(x, y))
                     surfaces.append([self.unpaved_road_surf, rect])
+                    surfaces_types[x // self.BLOCK_SIZE][
+                        y // self.BLOCK_SIZE
+                    ] = "unpaved_road"
                 elif rand_int == 1:
                     rect = self.grass_surf.get_rect(topleft=(x, y))
                     surfaces.append([self.grass_surf, rect])
+                    surfaces_types[x // self.BLOCK_SIZE][y // self.BLOCK_SIZE] = "grass"
                 elif rand_int == 2:
                     rect = self.sand_surf.get_rect(topleft=(x, y))
                     surfaces.append([self.sand_surf, rect])
-        return surfaces
+                    surfaces_types[x // self.BLOCK_SIZE][y // self.BLOCK_SIZE] = "sand"
+        return surfaces, surfaces_types
 
     # this method is called only once during the initialization of the game
     def _create_fence(self):
