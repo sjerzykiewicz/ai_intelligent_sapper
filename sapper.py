@@ -1,6 +1,9 @@
 import pygame
 from collections import deque
+from queue import PriorityQueue
+
 from bfs_state import BFSState
+from a_star_state import AStarState
 
 
 class Sapper:
@@ -77,6 +80,10 @@ class Sapper:
         path = self._find_path_bfs()
         self._auto_sapper_move(path, screen_drawer)
 
+    def auto_move_a_star(self, screen_drawer):
+        path = self._find_path_a_star()
+        self._auto_sapper_move(path, screen_drawer)
+
     def _get_slowing_power(self):
         slowing_power = [
             [None for _ in range(len(self.surfaces_types[0]))]
@@ -96,11 +103,11 @@ class Sapper:
         x = self.rect.x // self.block_size
         y = self.rect.y // self.block_size
         source = (x, y, self.angle)
-        end_state = self._search_state_space_bfs(source, self.goal)
+        goal_state = self._search_state_space_bfs(source, self.goal)
         path = []
-        while not end_state.is_initial:
-            path.append(end_state.action)
-            end_state = end_state.parent
+        while not goal_state.is_initial:
+            path.append(goal_state.action)
+            goal_state = goal_state.parent
 
         return path[::-1]
 
@@ -142,6 +149,104 @@ class Sapper:
         successors.append(BFSState(x, y, (angle + 90) % 360, state, "L"))
         successors.append(BFSState(x, y, (angle - 90) % 360, state, "R"))
         return successors
+
+    def _find_path_a_star(self):
+        x = self.rect.x // self.block_size
+        y = self.rect.y // self.block_size
+        source = AStarState(
+            x, y, self.angle, None, None, self.slowing_power[x][y], True
+        )
+        goal_x, goal_y, goal_angle = self.goal
+        goal = AStarState(
+            goal_x,
+            goal_y,
+            goal_angle,
+            None,
+            None,
+            self.slowing_power[goal_x][goal_y],
+        )
+        goal_state = self._search_state_space_a_star(source, goal)
+        path = []
+        while not goal_state.is_initial:
+            path.append(goal_state.action)
+            goal_state = goal_state.parent
+
+        return path[::-1]
+
+    def _search_state_space_a_star(
+        self, initial_state: AStarState, goal_state: AStarState
+    ):
+        x_start, y_start, angle_state = initial_state.get_pos()
+        x_end, y_end, _ = goal_state.get_pos()
+
+        cnt = 0
+        queue = PriorityQueue()
+        queue.put((0, cnt, initial_state))
+        visited_states = {(x_start, y_start, angle_state)}
+        initial_state.g = 0
+        initial_state.f = self._heuristic_a_star((x_start, y_start), (x_end, y_end))
+
+        while not queue.empty():
+            cur_state = queue.get()[2]
+            visited_states.remove(cur_state.get_pos())
+
+            x, y, _ = cur_state.get_pos()
+            if (x, y) == (x_end, y_end):
+                return cur_state
+
+            for next_state in self._get_succesor_states_a_star(cur_state):
+                temp_g = cur_state.g + next_state.slowing_power
+
+                if temp_g < next_state.g:
+                    next_state.parent = cur_state
+                    next_state.g = temp_g
+                    next_x, next_y, _ = next_state.get_pos()
+                    next_state.f = temp_g + self._heuristic_a_star(
+                        (next_x, next_y), (x_end, y_end)
+                    )
+                    if next_state.get_pos() not in visited_states:
+                        cnt += 1
+                        queue.put((next_state.f, cnt, next_state))
+                        visited_states.add(next_state.get_pos())
+
+        return initial_state
+
+    def _get_succesor_states_a_star(self, state):
+        x, y, angle = state.x, state.y, state.angle
+        successors = []
+        if angle == 0:
+            if (x, y - 1) not in self.occupied_blocks:
+                successors.append(
+                    AStarState(x, y - 1, 0, state, "F", self.slowing_power[x][y - 1])
+                )
+        elif angle == 90:
+            if (x - 1, y) not in self.occupied_blocks:
+                successors.append(
+                    AStarState(x - 1, y, 90, state, "F", self.slowing_power[x - 1][y])
+                )
+        elif angle == 180:
+            if (x, y + 1) not in self.occupied_blocks:
+                successors.append(
+                    AStarState(x, y + 1, 180, state, "F", self.slowing_power[x][y + 1])
+                )
+        elif angle == 270:
+            if (x + 1, y) not in self.occupied_blocks:
+                successors.append(
+                    AStarState(x + 1, y, 270, state, "F", self.slowing_power[x + 1][y])
+                )
+
+        successors.append(
+            AStarState(x, y, (angle + 90) % 360, state, "L", self.slowing_power[x][y])
+        )
+        successors.append(
+            AStarState(x, y, (angle - 90) % 360, state, "R", self.slowing_power[x][y])
+        )
+        return successors
+
+    def _heuristic_a_star(self, p1, p2):
+        x1, y1 = p1
+        x2, y2 = p2
+        return abs(x1 - x2) + abs(y1 - y2)
 
     def _auto_sapper_move(self, actions, screen_drawer):
         last_tick = pygame.time.get_ticks()

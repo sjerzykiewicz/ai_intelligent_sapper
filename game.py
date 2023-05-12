@@ -99,6 +99,8 @@ class Game:
                     self.sapper.rotate("right")
                 if event.key == pygame.K_b:
                     self.sapper.auto_move_bfs(self.screen_drawer)
+                if event.key == pygame.K_a:
+                    self.sapper.auto_move_a_star(self.screen_drawer)
                 if event.key == pygame.K_s:
                     x, y = pygame.mouse.get_pos()
                     x //= self.BLOCK_SIZE
