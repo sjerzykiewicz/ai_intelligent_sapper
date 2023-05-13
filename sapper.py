@@ -129,7 +129,7 @@ class Sapper:
                         queue.append((next_state))
         return BFSState(x_start, y_start, angle_state, None, None, True)
 
-    def _get_succesor_states_bfs(self, state: tuple) -> list:
+    def _get_succesor_states_bfs(self, state: BFSState) -> list:
         x, y, angle = state.x, state.y, state.angle
         successors = []
         forward = "F"
