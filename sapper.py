@@ -247,6 +247,12 @@ class Sapper:
         x1, y1 = p1
         x2, y2 = p2
         return abs(x1 - x2) + abs(y1 - y2)
+    
+    def time_bfs_and_a_star(self) -> None:
+        bfs_path = self._find_path_bfs()
+        a_star_path = self._find_path_a_star()
+
+        print(self._get_time_to_move(bfs_path), self._get_time_to_move(a_star_path))
 
     def _auto_sapper_move(self, actions: list, screen_drawer) -> None:
         last_tick = pygame.time.get_ticks()
@@ -261,8 +267,7 @@ class Sapper:
 
             screen_drawer.draw_screen()
 
-            x = self.rect.x // self.block_size
-            y = self.rect.y // self.block_size
+            x, y = self.get_pos()
 
             ticks = 50
 
@@ -277,3 +282,39 @@ class Sapper:
                 if pygame.time.get_ticks() - last_tick >= ticks:
                     last_tick = pygame.time.get_ticks()
                     break
+
+    def _get_time_to_move(self, actions: list) -> int:
+        cur_x, cur_y = self.get_pos()
+        answer = 0
+        if self.surfaces_types[cur_x][cur_y] == "sand":
+                answer += 200
+        elif self.surfaces_types[cur_x][cur_y] == "grass":
+            answer += 100
+        elif self.surfaces_types[cur_x][cur_y] == "unpaved_road":
+            answer += 50
+        cur_angle = self.get_angle()
+
+        for action in actions:
+
+            if action == "F":
+                if cur_angle == 0:
+                    cur_y -= 1
+                elif cur_angle == 90:
+                    cur_x -= 1
+                elif cur_angle == 180:
+                    cur_y += 1
+                elif cur_angle == 270:
+                    cur_x += 1
+            elif action == "L":
+                cur_angle = (cur_angle + 90) % 360
+            elif action == "R":
+                cur_angle = (cur_angle - 90) % 360
+
+            if self.surfaces_types[cur_x][cur_y] == "sand":
+                answer += 200
+            elif self.surfaces_types[cur_x][cur_y] == "grass":
+                answer += 100
+            elif self.surfaces_types[cur_x][cur_y] == "unpaved_road":
+                answer += 50
+
+        return answer

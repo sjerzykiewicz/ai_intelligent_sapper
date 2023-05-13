@@ -101,6 +101,8 @@ class Game:
                     self.sapper.auto_move_bfs(self.screen_drawer)
                 if event.key == pygame.K_a:
                     self.sapper.auto_move_a_star(self.screen_drawer)
+                if event.key == pygame.K_t:
+                    self.sapper.time_bfs_and_a_star()
                 if event.key == pygame.K_s:
                     x, y = pygame.mouse.get_pos()
                     x //= self.BLOCK_SIZE
