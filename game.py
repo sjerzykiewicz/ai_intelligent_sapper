@@ -76,14 +76,14 @@ class Game:
             self.fence,
         )
 
-    def run(self):
+    def run(self) -> None:
         while True:
             self._handle_events()
             self.screen_drawer.draw_screen()
             self._game_logic()
             self.clock.tick(60)
 
-    def _handle_events(self):
+    def _handle_events(self) -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.display.quit()
@@ -130,7 +130,7 @@ class Game:
                         self.occupied_blocks.remove((x, y))
                     self.is_landmine_here[x][y] = False
 
-    def _game_logic(self):
+    def _game_logic(self) -> None:
         pass
 
     # this method is called only once during the initialization of the game
@@ -160,7 +160,7 @@ class Game:
         return surfaces, surfaces_types
 
     # this method is called only once during the initialization of the game
-    def _create_fence(self):
+    def _create_fence(self) -> list[list]:
         fence = []
 
         for y in range(

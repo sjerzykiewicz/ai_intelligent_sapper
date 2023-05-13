@@ -24,25 +24,25 @@ class Sapper:
 
         self.slowing_power = self._get_slowing_power()
 
-    def get_surf(self):
+    def get_surf(self) -> pygame.Surface:
         return self.surf
 
-    def get_rect(self):
+    def get_rect(self) -> pygame.Rect:
         return self.rect
 
-    def get_pos(self):
+    def get_pos(self) -> tuple:
         return self.rect.x // self.block_size, self.rect.y // self.block_size
 
-    def get_angle(self):
+    def get_angle(self) -> int:
         return self.angle
 
-    def get_goal(self):
+    def get_goal(self) -> tuple:
         return self.goal
 
-    def change_goal(self, new_goal):
+    def change_goal(self, new_goal) -> None:
         self.goal = new_goal
 
-    def move_forward(self):
+    def move_forward(self) -> None:
         if self.angle == 0:
             if (
                 self.rect.x // self.block_size,
@@ -68,7 +68,7 @@ class Sapper:
             ) not in self.occupied_blocks:
                 self.rect.left += self.block_size
 
-    def rotate(self, direction):
+    def rotate(self, direction: str) -> None:
         if direction == "left":
             self.angle = (self.angle + 90) % 360
             self.surf = pygame.transform.rotate(self.origin_surf, self.angle)
@@ -76,15 +76,15 @@ class Sapper:
             self.angle = (self.angle - 90) % 360
             self.surf = pygame.transform.rotate(self.origin_surf, self.angle)
 
-    def auto_move_bfs(self, screen_drawer):
+    def auto_move_bfs(self, screen_drawer) -> None:
         path = self._find_path_bfs()
         self._auto_sapper_move(path, screen_drawer)
 
-    def auto_move_a_star(self, screen_drawer):
+    def auto_move_a_star(self, screen_drawer) -> None:
         path = self._find_path_a_star()
         self._auto_sapper_move(path, screen_drawer)
 
-    def _get_slowing_power(self):
+    def _get_slowing_power(self) -> list:
         slowing_power = [
             [None for _ in range(len(self.surfaces_types[0]))]
             for _ in range(len(self.surfaces_types))
@@ -99,7 +99,7 @@ class Sapper:
                     slowing_power[i][j] = 25
         return slowing_power
 
-    def _find_path_bfs(self):
+    def _find_path_bfs(self) -> list:
         x = self.rect.x // self.block_size
         y = self.rect.y // self.block_size
         source = (x, y, self.angle)
@@ -129,7 +129,7 @@ class Sapper:
                         queue.append((next_state))
         return BFSState(x_start, y_start, angle_state, None, None, True)
 
-    def _get_succesor_states_bfs(self, state):
+    def _get_succesor_states_bfs(self, state: tuple) -> list:
         x, y, angle = state.x, state.y, state.angle
         successors = []
         forward = "F"
@@ -150,7 +150,7 @@ class Sapper:
         successors.append(BFSState(x, y, (angle - 90) % 360, state, "R"))
         return successors
 
-    def _find_path_a_star(self):
+    def _find_path_a_star(self) -> list:
         x = self.rect.x // self.block_size
         y = self.rect.y // self.block_size
         source = AStarState(
@@ -175,7 +175,7 @@ class Sapper:
 
     def _search_state_space_a_star(
         self, initial_state: AStarState, goal_state: AStarState
-    ):
+    ) -> AStarState:
         x_start, y_start, angle_state = initial_state.get_pos()
         x_end, y_end, _ = goal_state.get_pos()
 
@@ -211,7 +211,7 @@ class Sapper:
 
         return initial_state
 
-    def _get_succesor_states_a_star(self, state):
+    def _get_succesor_states_a_star(self, state: AStarState) -> list:
         x, y, angle = state.x, state.y, state.angle
         successors = []
         if angle == 0:
@@ -243,12 +243,12 @@ class Sapper:
         )
         return successors
 
-    def _heuristic_a_star(self, p1, p2):
+    def _heuristic_a_star(self, p1: tuple, p2: tuple) -> int:
         x1, y1 = p1
         x2, y2 = p2
         return abs(x1 - x2) + abs(y1 - y2)
 
-    def _auto_sapper_move(self, actions, screen_drawer):
+    def _auto_sapper_move(self, actions: list, screen_drawer) -> None:
         last_tick = pygame.time.get_ticks()
 
         for action in actions:
