@@ -249,7 +249,7 @@ class Sapper:
         x1, y1 = p1
         x2, y2 = p2
         return abs(x1 - x2) + abs(y1 - y2)
-    
+
     def time_bfs_and_a_star(self) -> None:
         bfs_path = self._find_path_bfs()
         a_star_path = self._find_path_a_star()
@@ -291,7 +291,6 @@ class Sapper:
         answer = 0
 
         for action in actions:
-
             if action == "F":
                 if cur_angle == 0:
                     cur_y -= 1

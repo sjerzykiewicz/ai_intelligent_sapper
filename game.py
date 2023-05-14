@@ -136,7 +136,9 @@ class Game:
         pass
 
     # this method is called only once during the initialization of the game
-    def _create_grid_surfaces(self) -> tuple[list[list[pygame.Surface]], list[list[str]]]:
+    def _create_grid_surfaces(
+        self,
+    ) -> tuple[list[list[pygame.Surface]], list[list[str]]]:
         surfaces = []
         surfaces_types = [
             [None for _ in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE)]
