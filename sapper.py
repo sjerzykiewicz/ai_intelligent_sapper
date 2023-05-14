@@ -285,14 +285,8 @@ class Sapper:
 
     def _get_time_to_move(self, actions: list) -> int:
         cur_x, cur_y = self.get_pos()
-        answer = 0
-        if self.surfaces_types[cur_x][cur_y] == "sand":
-                answer += 200
-        elif self.surfaces_types[cur_x][cur_y] == "grass":
-            answer += 100
-        elif self.surfaces_types[cur_x][cur_y] == "unpaved_road":
-            answer += 50
         cur_angle = self.get_angle()
+        answer = 0
 
         for action in actions:
 
