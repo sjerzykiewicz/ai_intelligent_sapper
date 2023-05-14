@@ -185,10 +185,12 @@ class Sapper:
         visited_states = {(x_start, y_start, angle_state)}
         initial_state.g = 0
         initial_state.f = self._heuristic_a_star((x_start, y_start), (x_end, y_end))
+        iteration_limit = 1_000_000
 
-        while not queue.empty():
+        while not queue.empty() and iteration_limit:
             cur_state = queue.get()[2]
             visited_states.remove(cur_state.get_pos())
+            iteration_limit -= 1
 
             x, y, _ = cur_state.get_pos()
             if (x, y) == (x_end, y_end):
