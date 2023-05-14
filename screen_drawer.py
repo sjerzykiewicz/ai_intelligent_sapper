@@ -33,10 +33,10 @@ class ScreenDrawer:
         self.occupied_blocks = occupied_blocks
         self.fence = fence
 
-    def draw_screen(self):
+    def draw_screen(self) -> None:
         self._draw_screen()
 
-    def _draw_screen(self):
+    def _draw_screen(self) -> None:
         self.screen.fill(self.BLACK)
         self._draw_grid()
         self._draw_landmines()
@@ -46,10 +46,10 @@ class ScreenDrawer:
 
         pygame.display.update()
 
-    def _draw_sapper(self):
+    def _draw_sapper(self) -> None:
         self.screen.blit(self.sapper.get_surf(), self.sapper.get_rect())
 
-    def _draw_landmines(self):
+    def _draw_landmines(self) -> None:
         for row in range(len(self.is_landmine_here)):
             for col in range(len(self.is_landmine_here[0])):
                 if self.is_landmine_here[row][col]:
@@ -57,15 +57,15 @@ class ScreenDrawer:
                     bomb_rect = self.landmine_surf.get_rect(topleft=(x, y))
                     self.screen.blit(self.landmine_surf, bomb_rect)
 
-    def _draw_grid(self):
+    def _draw_grid(self) -> None:
         for surface, rect in self.surfaces:
             self.screen.blit(surface, rect)
 
-    def _draw_fence(self):
+    def _draw_fence(self) -> None:
         for fence, rect in self.fence:
             self.screen.blit(fence, rect)
 
-    def _draw_goal(self):
+    def _draw_goal(self) -> None:
         goal = self.sapper.get_goal()
         x, y = goal[0] * self.BLOCK_SIZE, goal[1] * self.BLOCK_SIZE
         if (goal[0], goal[1]) not in self.occupied_blocks:

@@ -2,7 +2,7 @@ import pygame
 from sapper import Sapper
 import sys
 from screen_drawer import ScreenDrawer
-from random import randrange
+from random import choices
 
 
 class Game:
@@ -76,14 +76,14 @@ class Game:
             self.fence,
         )
 
-    def run(self):
+    def run(self) -> None:
         while True:
             self._handle_events()
             self.screen_drawer.draw_screen()
             self._game_logic()
             self.clock.tick(60)
 
-    def _handle_events(self):
+    def _handle_events(self) -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.display.quit()
@@ -101,6 +101,8 @@ class Game:
                     self.sapper.auto_move_bfs(self.screen_drawer)
                 if event.key == pygame.K_a:
                     self.sapper.auto_move_a_star(self.screen_drawer)
+                if event.key == pygame.K_t:
+                    self.sapper.time_bfs_and_a_star()
                 if event.key == pygame.K_s:
                     x, y = pygame.mouse.get_pos()
                     x //= self.BLOCK_SIZE
@@ -130,37 +132,40 @@ class Game:
                         self.occupied_blocks.remove((x, y))
                     self.is_landmine_here[x][y] = False
 
-    def _game_logic(self):
+    def _game_logic(self) -> None:
         pass
 
     # this method is called only once during the initialization of the game
-    def _create_grid_surfaces(self):
+    def _create_grid_surfaces(
+        self,
+    ) -> tuple[list[list[pygame.Surface]], list[list[str]]]:
         surfaces = []
         surfaces_types = [
             [None for _ in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE)]
             for _ in range(self.WINDOW_WIDTH // self.BLOCK_SIZE)
         ]
+        types_of_surfaces = ["grass", "unpaved_road", "sand"]
+        weights = [50, 30, 20]
         for x in range(0, self.WINDOW_WIDTH, self.BLOCK_SIZE):
             for y in range(0, self.WINDOW_HEIGHT, self.BLOCK_SIZE):
-                rand_int = randrange(0, 3)
-                if rand_int == 0:
+                choice = choices(types_of_surfaces, weights=weights, k=1)[0]
+                if choice == "unpaved_road":
                     rect = self.unpaved_road_surf.get_rect(topleft=(x, y))
                     surfaces.append([self.unpaved_road_surf, rect])
-                    surfaces_types[x // self.BLOCK_SIZE][
-                        y // self.BLOCK_SIZE
-                    ] = "unpaved_road"
-                elif rand_int == 1:
+                elif choice == "grass":
                     rect = self.grass_surf.get_rect(topleft=(x, y))
                     surfaces.append([self.grass_surf, rect])
-                    surfaces_types[x // self.BLOCK_SIZE][y // self.BLOCK_SIZE] = "grass"
-                elif rand_int == 2:
+                elif choice == "sand":
                     rect = self.sand_surf.get_rect(topleft=(x, y))
                     surfaces.append([self.sand_surf, rect])
-                    surfaces_types[x // self.BLOCK_SIZE][y // self.BLOCK_SIZE] = "sand"
+
+                i, j = x // self.BLOCK_SIZE, y // self.BLOCK_SIZE
+                surfaces_types[i][j] = choice
+
         return surfaces, surfaces_types
 
     # this method is called only once during the initialization of the game
-    def _create_fence(self):
+    def _create_fence(self) -> list[list]:
         fence = []
 
         for y in range(
