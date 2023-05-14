@@ -1,6 +1,7 @@
 import pygame
 from collections import deque
 from queue import PriorityQueue
+import sys
 
 from bfs_state import BFSState
 from a_star_state import AStarState
@@ -280,6 +281,12 @@ class Sapper:
                 ticks = 50
 
             while True:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.display.quit()
+                        pygame.quit()
+                        sys.exit()
+
                 if pygame.time.get_ticks() - last_tick >= ticks:
                     last_tick = pygame.time.get_ticks()
                     break
