@@ -251,7 +251,9 @@ class Sapper:
         bfs_path = self._find_path_bfs()
         a_star_path = self._find_path_a_star()
 
-        print(self._get_time_to_move(bfs_path), self._get_time_to_move(a_star_path))
+        print(
+            f"BFS: {self._get_time_to_move(bfs_path)}, A*: {self._get_time_to_move(a_star_path)}"
+        )
 
     def _auto_sapper_move(self, actions: list, screen_drawer) -> None:
         last_tick = pygame.time.get_ticks()
