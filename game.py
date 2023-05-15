@@ -1,6 +1,8 @@
 import pygame
 from sapper import Sapper
 import sys
+from screen_drawer import ScreenDrawer
+from random import choices
 
 
 class Game:
@@ -18,25 +20,14 @@ class Game:
 
         grass_path = "gfx/surfaces/grass.png"
         self.grass_surf = pygame.image.load(grass_path).convert_alpha()
-        self.rects = self._create_grid_rects()
 
-        self.laser_vertical = pygame.image.load("gfx/laser/laser_1.png").convert_alpha()
-        self.laser_horizontal = pygame.image.load(
-            "gfx/laser/laser_2.png"
-        ).convert_alpha()
-        self.laser_corner_1 = pygame.image.load("gfx/laser/laser_3.png").convert_alpha()
-        self.laser_corner_2 = pygame.image.load("gfx/laser/laser_4.png").convert_alpha()
-        self.laser_corner_3 = pygame.image.load("gfx/laser/laser_5.png").convert_alpha()
-        self.laser_corner_4 = pygame.image.load("gfx/laser/laser_6.png").convert_alpha()
-        self.laser_vertical.set_alpha(128)
-        self.laser_horizontal.set_alpha(128)
-        self.laser_corner_1.set_alpha(128)
-        self.laser_corner_2.set_alpha(128)
-        self.laser_corner_3.set_alpha(128)
-        self.laser_corner_4.set_alpha(128)
-        self.to_visualize = []
-        self.to_visualize_done = False
-        self.toggle_animation = False
+        unpaved_road_path = "gfx/surfaces/unpaved_road.png"
+        self.unpaved_road_surf = pygame.image.load(unpaved_road_path).convert_alpha()
+
+        sand_path = "gfx/surfaces/sand.png"
+        self.sand_surf = pygame.image.load(sand_path).convert_alpha()
+
+        self.surfaces, self.surfaces_types = self._create_grid_surfaces()
 
         landmine_path = "gfx/bombs/landmine.png"
         self.landmine_surf = pygame.image.load(landmine_path).convert_alpha()
@@ -45,7 +36,17 @@ class Game:
             self.WINDOW_HEIGHT // self.BLOCK_SIZE,
         )
         self.is_landmine_here = [[False for _ in range(columns)] for _ in range(rows)]
+
         self.occupied_blocks = set()
+        self.fence_vertical = pygame.image.load("gfx/fence/fence_1.png").convert_alpha()
+        self.fence_horizontal = pygame.image.load(
+            "gfx/fence/fence_2.png"
+        ).convert_alpha()
+        self.fence_corner_1 = pygame.image.load("gfx/fence/fence_3.png").convert_alpha()
+        self.fence_corner_2 = pygame.image.load("gfx/fence/fence_4.png").convert_alpha()
+        self.fence_corner_3 = pygame.image.load("gfx/fence/fence_5.png").convert_alpha()
+        self.fence_corner_4 = pygame.image.load("gfx/fence/fence_6.png").convert_alpha()
+        self.fence = self._create_fence()
 
         sapper_path = "gfx/sapper/sapper.png"
         self.sapper = Sapper(
@@ -54,19 +55,35 @@ class Game:
             self.BLOCK_SIZE,
             (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
             self.occupied_blocks,
+            self.surfaces_types,
         )
 
         self.flag_path = "gfx/flags/flag.png"
         self.flag_surf = pygame.image.load(self.flag_path).convert_alpha()
 
-    def run(self):
+        self.screen_drawer = ScreenDrawer(
+            self.sapper,
+            self.screen,
+            self.clock,
+            self.surfaces,
+            self.landmine_surf,
+            self.flag_surf,
+            self.BLOCK_SIZE,
+            self.WINDOW_WIDTH,
+            self.WINDOW_HEIGHT,
+            self.is_landmine_here,
+            self.occupied_blocks,
+            self.fence,
+        )
+
+    def run(self) -> None:
         while True:
             self._handle_events()
+            self.screen_drawer.draw_screen()
             self._game_logic()
-            self._draw_screen()
             self.clock.tick(60)
 
-    def _handle_events(self):
+    def _handle_events(self) -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.display.quit()
@@ -80,87 +97,86 @@ class Game:
                     self.sapper.rotate("left")
                 if event.key == pygame.K_RIGHT:
                     self.sapper.rotate("right")
-                if event.key == pygame.K_w:
-                    self.to_visualize = self.sapper.find_path()
-                    self.to_visualize_done = False
-                if event.key == pygame.K_g:
-                    if self.to_visualize:
-                        self._auto_sapper_move()
-                        self.to_visualize = False
+                if event.key == pygame.K_b:
+                    self.sapper.auto_move_bfs(self.screen_drawer)
+                if event.key == pygame.K_a:
+                    self.sapper.auto_move_a_star(self.screen_drawer)
+                if event.key == pygame.K_t:
+                    self.sapper.time_bfs_and_a_star()
                 if event.key == pygame.K_s:
                     x, y = pygame.mouse.get_pos()
                     x //= self.BLOCK_SIZE
                     y //= self.BLOCK_SIZE
-                    self.sapper.change_goal((x, y, 0))
-                if event.key == pygame.K_a:
-                    self.toggle_animation = not self.toggle_animation
+                    if (x, y) not in self.occupied_blocks:
+                        self.sapper.change_goal((x, y, 0))
 
             mouse_pressed = pygame.mouse.get_pressed()
             x, y = pygame.mouse.get_pos()
             x //= self.BLOCK_SIZE
             y //= self.BLOCK_SIZE
             if mouse_pressed[0]:
-                self.is_landmine_here[x][y] = True
-                self.occupied_blocks.add((x, y))
+                if (
+                    (x, y) not in self.occupied_blocks
+                    and 0 <= x < self.WINDOW_WIDTH // self.BLOCK_SIZE
+                    and 0 <= y < self.WINDOW_HEIGHT // self.BLOCK_SIZE
+                ):
+                    self.is_landmine_here[x][y] = True
+                    self.occupied_blocks.add((x, y))
 
             if mouse_pressed[2]:
-                if self.is_landmine_here[x][y]:
-                    self.occupied_blocks.remove((x, y))
-                self.is_landmine_here[x][y] = False
+                if (
+                    0 <= x < self.WINDOW_WIDTH // self.BLOCK_SIZE
+                    and 0 <= y < self.WINDOW_HEIGHT // self.BLOCK_SIZE
+                ):
+                    if self.is_landmine_here[x][y]:
+                        self.occupied_blocks.remove((x, y))
+                    self.is_landmine_here[x][y] = False
 
-    def _game_logic(self):
-        sapper_x, sapper_y = self.sapper.get_pos()
-        if self.is_landmine_here[sapper_x][sapper_y]:
-            self.occupied_blocks.remove((sapper_x, sapper_y))
-        self.is_landmine_here[sapper_x][sapper_y] = False
+    def _game_logic(self) -> None:
+        pass
 
-    def _draw_screen(self):
-        self.screen.fill(self.BLACK)
-        self._draw_grid()
-        self._draw_landmines()
-        self._draw_fence()
-        self._visualize_path()
-        self._draw_goal()
-        self._draw_sapper()
-
-        pygame.display.update()
-
-    def _draw_sapper(self):
-        self.screen.blit(self.sapper.get_surf(), self.sapper.get_rect())
-
-    def _draw_landmines(self):
-        for row in range(len(self.is_landmine_here)):
-            for col in range(len(self.is_landmine_here[0])):
-                if self.is_landmine_here[row][col]:
-                    x, y = row * self.BLOCK_SIZE, col * self.BLOCK_SIZE
-                    bomb_rect = self.landmine_surf.get_rect(topleft=(x, y))
-                    self.screen.blit(self.landmine_surf, bomb_rect)
-
-    def _create_grid_rects(self):
-        rects = []
+    # this method is called only once during the initialization of the game
+    def _create_grid_surfaces(
+        self,
+    ) -> tuple[list[list[pygame.Surface]], list[list[str]]]:
+        surfaces = []
+        surfaces_types = [
+            [None for _ in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE)]
+            for _ in range(self.WINDOW_WIDTH // self.BLOCK_SIZE)
+        ]
+        types_of_surfaces = ["grass", "unpaved_road", "sand"]
+        weights = [50, 30, 20]
         for x in range(0, self.WINDOW_WIDTH, self.BLOCK_SIZE):
             for y in range(0, self.WINDOW_HEIGHT, self.BLOCK_SIZE):
-                rect = self.grass_surf.get_rect(topleft=(x, y))
-                rects.append(rect)
-        return rects
+                choice = choices(types_of_surfaces, weights=weights, k=1)[0]
+                if choice == "unpaved_road":
+                    rect = self.unpaved_road_surf.get_rect(topleft=(x, y))
+                    surfaces.append([self.unpaved_road_surf, rect])
+                elif choice == "grass":
+                    rect = self.grass_surf.get_rect(topleft=(x, y))
+                    surfaces.append([self.grass_surf, rect])
+                elif choice == "sand":
+                    rect = self.sand_surf.get_rect(topleft=(x, y))
+                    surfaces.append([self.sand_surf, rect])
 
-    def _draw_grid(self):
-        for rect in self.rects:
-            self.screen.blit(self.grass_surf, rect)
+                i, j = x // self.BLOCK_SIZE, y // self.BLOCK_SIZE
+                surfaces_types[i][j] = choice
 
-    def _draw_fence(self):
-        fence_vertical = pygame.image.load("gfx/fence/fence_1.png").convert_alpha()
-        fence_horizontal = pygame.image.load("gfx/fence/fence_2.png").convert_alpha()
-        fence_corner_1 = pygame.image.load("gfx/fence/fence_3.png").convert_alpha()
-        fence_corner_2 = pygame.image.load("gfx/fence/fence_4.png").convert_alpha()
-        fence_corner_3 = pygame.image.load("gfx/fence/fence_5.png").convert_alpha()
-        fence_corner_4 = pygame.image.load("gfx/fence/fence_6.png").convert_alpha()
+        return surfaces, surfaces_types
+
+    # this method is called only once during the initialization of the game
+    def _create_fence(self) -> list[list]:
+        fence = []
 
         for y in range(
             self.BLOCK_SIZE, self.WINDOW_HEIGHT - self.BLOCK_SIZE, self.BLOCK_SIZE
         ):
-            self.screen.blit(fence_vertical, (0, y))
-            self.screen.blit(fence_vertical, (self.WINDOW_WIDTH - self.BLOCK_SIZE, y))
+            rect = self.fence_vertical.get_rect(topleft=(0, y))
+            fence.append([self.fence_vertical, rect])
+            rect = self.fence_vertical.get_rect(
+                topleft=(self.WINDOW_WIDTH - self.BLOCK_SIZE, y)
+            )
+            fence.append([self.fence_vertical, rect])
 
             self.occupied_blocks.add((0, y // self.BLOCK_SIZE))
             self.occupied_blocks.add(
@@ -173,10 +189,12 @@ class Game:
         for x in range(
             self.BLOCK_SIZE, self.WINDOW_WIDTH - self.BLOCK_SIZE, self.BLOCK_SIZE
         ):
-            self.screen.blit(fence_horizontal, (x, 0))
-            self.screen.blit(
-                fence_horizontal, (x, self.WINDOW_HEIGHT - self.BLOCK_SIZE)
+            rect = self.fence_horizontal.get_rect(topleft=(x, 0))
+            fence.append([self.fence_horizontal, rect])
+            rect = self.fence_horizontal.get_rect(
+                topleft=(x, self.WINDOW_HEIGHT - self.BLOCK_SIZE)
             )
+            fence.append([self.fence_horizontal, rect])
 
             self.occupied_blocks.add((x // self.BLOCK_SIZE, 0))
             self.occupied_blocks.add(
@@ -186,13 +204,24 @@ class Game:
                 )
             )
 
-        self.screen.blit(fence_corner_1, (0, 0))
-        self.screen.blit(fence_corner_2, (self.WINDOW_WIDTH - self.BLOCK_SIZE, 0))
-        self.screen.blit(fence_corner_3, (0, self.WINDOW_HEIGHT - self.BLOCK_SIZE))
-        self.screen.blit(
-            fence_corner_4,
-            (self.WINDOW_WIDTH - self.BLOCK_SIZE, self.WINDOW_HEIGHT - self.BLOCK_SIZE),
+        rect = self.fence_corner_1.get_rect(topleft=(0, 0))
+        fence.append([self.fence_corner_1, rect])
+        rect = self.fence_corner_2.get_rect(
+            topleft=(self.WINDOW_WIDTH - self.BLOCK_SIZE, 0)
         )
+        fence.append([self.fence_corner_2, rect])
+        rect = self.fence_corner_3.get_rect(
+            topleft=(0, self.WINDOW_HEIGHT - self.BLOCK_SIZE)
+        )
+        fence.append([self.fence_corner_3, rect])
+
+        rect = self.fence_corner_4.get_rect(
+            topleft=(
+                self.WINDOW_WIDTH - self.BLOCK_SIZE,
+                self.WINDOW_HEIGHT - self.BLOCK_SIZE,
+            )
+        )
+        fence.append([self.fence_corner_4, rect])
 
         self.occupied_blocks.add((0, 0))
         self.occupied_blocks.add(
@@ -208,154 +237,4 @@ class Game:
             )
         )
 
-    def _visualize_path(self):
-        if not self.to_visualize:
-            return
-        if self.to_visualize_done:
-            x, y, rot = (
-                self.to_visualize[-1][0] * self.BLOCK_SIZE,
-                self.to_visualize[-1][1] * self.BLOCK_SIZE,
-                self.to_visualize[-1][2],
-            )
-            if rot == 0 or rot == 180:
-                laser_rect = self.laser_vertical.get_rect(topleft=(x, y))
-                laser_surf = self.laser_vertical
-                self.screen.blit(laser_surf, laser_rect)
-            else:
-                laser_rect = self.laser_horizontal.get_rect(topleft=(x, y))
-                laser_surf = self.laser_horizontal
-                self.screen.blit(laser_surf, laser_rect)
-
-            for i in range(1, len(self.to_visualize) - 1):
-                x, y, rot = (
-                    self.to_visualize[i][0] * self.BLOCK_SIZE,
-                    self.to_visualize[i][1] * self.BLOCK_SIZE,
-                    self.to_visualize[i][2],
-                )
-                last_x, last_y, last_rot = (
-                    self.to_visualize[i - 1][0] * self.BLOCK_SIZE,
-                    self.to_visualize[i - 1][1] * self.BLOCK_SIZE,
-                    self.to_visualize[i - 1][2],
-                )
-
-                next_x, next_y, next_rot = (
-                    self.to_visualize[i + 1][0] * self.BLOCK_SIZE,
-                    self.to_visualize[i + 1][1] * self.BLOCK_SIZE,
-                    self.to_visualize[i + 1][2],
-                )
-
-                laser_rect = self.laser_vertical.get_rect(topleft=(x, y))
-                laser_surf = self.laser_vertical
-
-                if last_x != x:
-                    laser_rect = self.laser_horizontal.get_rect(topleft=(x, y))
-                    laser_surf = self.laser_horizontal
-
-                if rot != last_rot:
-                    if (rot == 180 and last_rot == 90) or (
-                        rot == 270 and last_rot == 0
-                    ):
-                        laser_rect = self.laser_corner_1.get_rect(topleft=(x, y))
-                        laser_surf = self.laser_corner_1
-                    if (rot == 90 and last_rot == 0) or (
-                        rot == 180 and last_rot == 270
-                    ):
-                        laser_rect = self.laser_corner_2.get_rect(topleft=(x, y))
-                        laser_surf = self.laser_corner_2
-                    if (rot == 0 and last_rot == 90) or (
-                        rot == 270 and last_rot == 180
-                    ):
-                        laser_rect = self.laser_corner_3.get_rect(topleft=(x, y))
-                        laser_surf = self.laser_corner_3
-                    if (rot == 0 and last_rot == 270) or (
-                        rot == 90 and last_rot == 180
-                    ):
-                        laser_rect = self.laser_corner_4.get_rect(topleft=(x, y))
-                        laser_surf = self.laser_corner_4
-                if rot == next_rot:
-                    self.screen.blit(laser_surf, laser_rect)
-            return
-        if self.toggle_animation:
-            last_tick = pygame.time.get_ticks()
-            for i in range(1, len(self.to_visualize) - 1):
-                x, y, rot = (
-                    self.to_visualize[i][0] * self.BLOCK_SIZE,
-                    self.to_visualize[i][1] * self.BLOCK_SIZE,
-                    self.to_visualize[i][2],
-                )
-                last_x, last_rot = (
-                    self.to_visualize[i - 1][0] * self.BLOCK_SIZE,
-                    self.to_visualize[i - 1][2],
-                )
-
-                next_rot = self.to_visualize[i + 1][2]
-
-                laser_rect = self.laser_vertical.get_rect(topleft=(x, y))
-                laser_surf = self.laser_vertical
-
-                if last_x != x:
-                    laser_rect = self.laser_horizontal.get_rect(topleft=(x, y))
-                    laser_surf = self.laser_horizontal
-
-                if rot != last_rot:
-                    if (rot == 180 and last_rot == 90) or (
-                        rot == 270 and last_rot == 0
-                    ):
-                        laser_rect = self.laser_corner_1.get_rect(topleft=(x, y))
-                        laser_surf = self.laser_corner_1
-                    if (rot == 90 and last_rot == 0) or (
-                        rot == 180 and last_rot == 270
-                    ):
-                        laser_rect = self.laser_corner_2.get_rect(topleft=(x, y))
-                        laser_surf = self.laser_corner_2
-                    if (rot == 0 and last_rot == 90) or (
-                        rot == 270 and last_rot == 180
-                    ):
-                        laser_rect = self.laser_corner_3.get_rect(topleft=(x, y))
-                        laser_surf = self.laser_corner_3
-                    if (rot == 0 and last_rot == 270) or (
-                        rot == 90 and last_rot == 180
-                    ):
-                        laser_rect = self.laser_corner_4.get_rect(topleft=(x, y))
-                        laser_surf = self.laser_corner_4
-                if rot == next_rot:
-                    self.screen.blit(laser_surf, laser_rect)
-
-                pygame.display.update(laser_rect)
-                while True:
-                    if pygame.time.get_ticks() - last_tick >= 20:
-                        last_tick = pygame.time.get_ticks()
-                        break
-        self.to_visualize_done = True
-
-    def _draw_goal(self):
-        goal = self.sapper.get_goal()
-        x, y = goal[0] * self.BLOCK_SIZE, goal[1] * self.BLOCK_SIZE
-        if (goal[0], goal[1]) not in self.occupied_blocks:
-            flag_rect = self.flag_surf.get_rect(topleft=(x, y))
-            self.screen.blit(self.flag_surf, flag_rect)
-
-    def _auto_sapper_move(self):
-        last_tick = pygame.time.get_ticks()
-
-        x, y = self.sapper.get_pos()
-
-        for block in self.to_visualize:
-            if self.sapper.get_angle() != block[2]:
-                while self.sapper.get_angle() != block[2]:
-                    if self.sapper.get_angle() - block[2] == 90:
-                        self.sapper.rotate("right")
-
-                    else:
-                        self.sapper.rotate("left")
-                continue
-
-            self.sapper.move_forward()
-
-            self._draw_screen()
-            pygame.display.update()
-
-            while True:
-                if pygame.time.get_ticks() - last_tick >= 50:
-                    last_tick = pygame.time.get_ticks()
-                    break
+        return fence
