@@ -269,16 +269,16 @@ class Sapper:
 
             screen_drawer.draw_screen()
 
-            x, y = self.get_pos()
+            cur_x, cur_y = self.get_pos()
 
             ticks = 50
 
-            if self.surfaces_types[x][y] == "sand":
-                ticks = 200
-            elif self.surfaces_types[x][y] == "grass":
-                ticks = 100
-            elif self.surfaces_types[x][y] == "unpaved_road":
+            if self.surfaces_types[cur_x][cur_y] == "unpaved_road":
                 ticks = 50
+            elif self.surfaces_types[cur_x][cur_y] == "grass":
+                ticks = 100
+            elif self.surfaces_types[cur_x][cur_y] == "sand":
+                ticks = 200
 
             while True:
                 for event in pygame.event.get():
@@ -311,11 +311,11 @@ class Sapper:
             elif action == "R":
                 cur_angle = (cur_angle - 90) % 360
 
-            if self.surfaces_types[cur_x][cur_y] == "sand":
-                answer += 200
+            if self.surfaces_types[cur_x][cur_y] == "unpaved_road":
+                answer += 1
             elif self.surfaces_types[cur_x][cur_y] == "grass":
-                answer += 100
-            elif self.surfaces_types[cur_x][cur_y] == "unpaved_road":
-                answer += 50
+                answer += 5
+            elif self.surfaces_types[cur_x][cur_y] == "sand":
+                answer += 25
 
         return answer
