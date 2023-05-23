@@ -71,6 +71,8 @@ class Game:
             place_for_goal,
         )
 
+        self.weather, self.time = self._get_weather_and_time()
+
         self.screen_drawer = ScreenDrawer(
             self.sapper,
             self.screen,
@@ -85,6 +87,8 @@ class Game:
             self.occupied_blocks,
             self.fence,
             self.barrels,
+            self.weather,
+            self.time,
         )
 
     def run(self) -> None:
@@ -157,7 +161,7 @@ class Game:
                 surfaces_types[i][j] = choice
 
         return surfaces, surfaces_types
-    
+
     # this method is called only once during the initialization of the game
     def _create_bombs(self) -> tuple[list[list[pygame.Surface]], list[list[str]]]:
         bombs = []
@@ -264,7 +268,7 @@ class Game:
         )
 
         return fence
-    
+
     # this method is called only once during the initialization of the game
     def _create_barrels(self) -> list[list]:
         barrels = []
@@ -272,7 +276,9 @@ class Game:
             x = randint(0, self.WINDOW_WIDTH // self.BLOCK_SIZE - 1)
             y = randint(0, self.WINDOW_HEIGHT // self.BLOCK_SIZE - 1)
             if (x, y) not in self.occupied_blocks:
-                rect = self.barrel_surf.get_rect(topleft=(x * self.BLOCK_SIZE, y * self.BLOCK_SIZE))
+                rect = self.barrel_surf.get_rect(
+                    topleft=(x * self.BLOCK_SIZE, y * self.BLOCK_SIZE)
+                )
                 barrels.append([self.barrel_surf, rect])
                 self.occupied_blocks.add((x, y))
         return barrels
@@ -282,9 +288,20 @@ class Game:
             for y in range(1, self.WINDOW_HEIGHT // self.BLOCK_SIZE - 1):
                 if (x, y) not in self.occupied_blocks:
                     return x, y
-            
+
     def _get_place_for_sapper(self):
         for x in range(self.WINDOW_WIDTH // self.BLOCK_SIZE - 1, 0, -1):
             for y in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE - 1, 0, -1):
                 if (x, y) not in self.occupied_blocks and not self.bomb_types[x][y]:
                     return x, y
+
+    def _get_weather_and_time(self):
+        weather_choices = ["sunny", "rainy"]
+        weather_weights = [80, 2000]
+        time_choices = ["day", "night"]
+        time_weights = [80, 20]
+
+        weather = choices(weather_choices, weights=weather_weights, k=1)[0]
+        time = choices(time_choices, weights=time_weights, k=1)[0]
+
+        return weather, time

@@ -20,6 +20,8 @@ class ScreenDrawer:
         occupied_blocks,
         fence,
         barrels,
+        weather,
+        time,
     ):
         self.sapper = sapper
         self.screen = screen
@@ -34,6 +36,24 @@ class ScreenDrawer:
         self.occupied_blocks = occupied_blocks
         self.fence = fence
         self.barrels = barrels
+        self.weather = weather
+        self.time = time
+
+        self.weather_filter = pygame.Surface((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
+        self.weather_filter.fill((0, 0, 0))
+        self.weather_filter.set_alpha(0)
+
+        if self.weather == "rainy":
+            self.weather_filter.fill((50, 50, 150))
+            self.weather_filter.set_alpha(100)
+
+        self.time_filter = pygame.Surface((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
+        self.time_filter.fill((0, 0, 0))
+        self.time_filter.set_alpha(0)
+
+        if self.time == "night":
+            self.time_filter.fill((0, 0, 0))
+            self.time_filter.set_alpha(100)
 
     def draw_screen(self) -> None:
         self._draw_screen()
@@ -46,6 +66,7 @@ class ScreenDrawer:
         self._draw_goal()
         self._draw_sapper()
         self._draw_barrels()
+        self._draw_weather_and_time()
 
         pygame.display.update()
 
@@ -74,3 +95,7 @@ class ScreenDrawer:
         if (i, j) not in self.occupied_blocks:
             flag_rect = self.flag_surf.get_rect(topleft=(x, y))
             self.screen.blit(self.flag_surf, flag_rect)
+
+    def _draw_weather_and_time(self) -> None:
+        self.screen.blit(self.weather_filter, (0, 0))
+        self.screen.blit(self.time_filter, (0, 0))
