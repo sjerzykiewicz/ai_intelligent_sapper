@@ -154,7 +154,7 @@ class Game:
 
         return surfaces, surfaces_types
     
-    # define a similar method to _create_grid_surfaces but it will create a list of bombs of different types and return it
+    # this method is called only once during the initialization of the game
     def _create_bombs(self) -> tuple[list[list[pygame.Surface]], list[list[str]]]:
         bombs = []
         bombs_types = [
@@ -168,7 +168,7 @@ class Game:
                 i, j = x // self.BLOCK_SIZE, y // self.BLOCK_SIZE
                 if (i, j) in self.occupied_blocks:
                     continue
-                
+
                 choice = choices(types_of_bombs, weights=weights, k=1)[0]
                 if choice == "none":
                     continue
@@ -261,6 +261,7 @@ class Game:
 
         return fence
     
+    # this method is called only once during the initialization of the game
     def _create_barrels(self) -> list[list]:
         barrels = []
         for _ in range(20):
