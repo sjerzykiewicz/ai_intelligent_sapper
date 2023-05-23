@@ -29,12 +29,6 @@ class Game:
 
         self.surfaces, self.surfaces_types = self._create_grid_surfaces()
 
-        rows, columns = (
-            self.WINDOW_WIDTH // self.BLOCK_SIZE,
-            self.WINDOW_HEIGHT // self.BLOCK_SIZE,
-        )
-        self.is_landmine_here = [[False for _ in range(columns)] for _ in range(rows)]
-
         self.occupied_blocks = set()
         self.fence_vertical = pygame.image.load("gfx/fence/fence_1.png").convert_alpha()
         self.fence_horizontal = pygame.image.load(
@@ -57,6 +51,8 @@ class Game:
         hcb = "gfx/bombs/hcb.png"
         self.hcb_surf = pygame.image.load(hcb).convert_alpha()
 
+        self.bombs, self.bomb_types = self._create_bombs()
+
         sapper_path = "gfx/sapper/sapper.png"
         self.sapper = StandardSapper(
             (576, 672),
@@ -65,6 +61,7 @@ class Game:
             (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
             self.occupied_blocks,
             self.surfaces_types,
+            self.bomb_types,
         )
 
         self.flag_path = "gfx/flags/flag.png"
@@ -80,7 +77,7 @@ class Game:
             self.BLOCK_SIZE,
             self.WINDOW_WIDTH,
             self.WINDOW_HEIGHT,
-            self.is_landmine_here,
+            self.bombs,
             self.occupied_blocks,
             self.fence,
             self.barrels,
@@ -120,27 +117,10 @@ class Game:
                     if (x, y) not in self.occupied_blocks:
                         self.sapper.change_goal((x, y, 0))
 
-            mouse_pressed = pygame.mouse.get_pressed()
-            x, y = pygame.mouse.get_pos()
-            x //= self.BLOCK_SIZE
-            y //= self.BLOCK_SIZE
-            if mouse_pressed[0]:
-                if (
-                    (x, y) not in self.occupied_blocks
-                    and 0 <= x < self.WINDOW_WIDTH // self.BLOCK_SIZE
-                    and 0 <= y < self.WINDOW_HEIGHT // self.BLOCK_SIZE
-                ):
-                    self.is_landmine_here[x][y] = True
-                    self.occupied_blocks.add((x, y))
-
-            if mouse_pressed[2]:
-                if (
-                    0 <= x < self.WINDOW_WIDTH // self.BLOCK_SIZE
-                    and 0 <= y < self.WINDOW_HEIGHT // self.BLOCK_SIZE
-                ):
-                    if self.is_landmine_here[x][y]:
-                        self.occupied_blocks.remove((x, y))
-                    self.is_landmine_here[x][y] = False
+            # mouse_pressed = pygame.mouse.get_pressed()
+            # x, y = pygame.mouse.get_pos()
+            # x //= self.BLOCK_SIZE
+            # y //= self.BLOCK_SIZE
 
     def _game_logic(self) -> None:
         pass
@@ -173,6 +153,38 @@ class Game:
                 surfaces_types[i][j] = choice
 
         return surfaces, surfaces_types
+    
+    # define a similar method to _create_grid_surfaces but it will create a list of bombs of different types and return it
+    def _create_bombs(self) -> tuple[list[list[pygame.Surface]], list[list[str]]]:
+        bombs = []
+        bombs_types = [
+            [None for _ in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE)]
+            for _ in range(self.WINDOW_WIDTH // self.BLOCK_SIZE)
+        ]
+        types_of_bombs = ["none", "claymore", "landmine", "hcb"]
+        weights = [400, 50, 30, 20]
+        for x in range(0, self.WINDOW_WIDTH, self.BLOCK_SIZE):
+            for y in range(0, self.WINDOW_HEIGHT, self.BLOCK_SIZE):
+                i, j = x // self.BLOCK_SIZE, y // self.BLOCK_SIZE
+                if (i, j) in self.occupied_blocks:
+                    continue
+                
+                choice = choices(types_of_bombs, weights=weights, k=1)[0]
+                if choice == "none":
+                    continue
+                elif choice == "claymore":
+                    rect = self.claymore_surf.get_rect(topleft=(x, y))
+                    bombs.append([self.claymore_surf, rect])
+                elif choice == "landmine":
+                    rect = self.landmine_surf.get_rect(topleft=(x, y))
+                    bombs.append([self.landmine_surf, rect])
+                elif choice == "hcb":
+                    rect = self.hcb_surf.get_rect(topleft=(x, y))
+                    bombs.append([self.hcb_surf, rect])
+
+                bombs_types[i][j] = choice
+
+        return bombs, bombs_types
 
     # this method is called only once during the initialization of the game
     def _create_fence(self) -> list[list]:
