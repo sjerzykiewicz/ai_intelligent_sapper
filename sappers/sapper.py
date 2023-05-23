@@ -330,3 +330,14 @@ class Sapper:
                 answer += 50
 
         return answer
+    
+    def _get_bombs_to_neutralize(self) -> list:
+        x_goal, y_goal, _ = self.get_goal()
+        bombs_to_neutralize = []
+        for i in range(-5, 5):
+            for j in range(-5, 5):
+                x, y = x_goal + i, y_goal + j
+                if 0 <= x < len(self.bombs) and 0 <= y < len(self.bombs[0]) and self.bombs[x][y]:
+                    bombs_to_neutralize.append((x, y))
+
+        return bombs_to_neutralize
