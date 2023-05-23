@@ -1,4 +1,4 @@
-from surface import Surface
+from surfaces.surface import Surface
 
 
 class Sand(Surface):
