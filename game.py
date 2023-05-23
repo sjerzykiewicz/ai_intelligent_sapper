@@ -1,5 +1,5 @@
 import pygame
-from sapper import Sapper
+from sappers.standard_sapper import StandardSapper
 import sys
 from screen_drawer import ScreenDrawer
 from random import choices
@@ -49,7 +49,7 @@ class Game:
         self.fence = self._create_fence()
 
         sapper_path = "gfx/sapper/sapper.png"
-        self.sapper = Sapper(
+        self.sapper = StandardSapper(
             (576, 672),
             sapper_path,
             self.BLOCK_SIZE,

@@ -10,6 +10,7 @@ from a_star_state import AStarState
 class Sapper:
     def __init__(self, pos, img, block_size, win_size, occupied_blocks, surfaces_types):
         self.speed = 10
+        self.can_defuse_in_rain = False
         self.bombs_that_can_defuse = []
         self.capacity = 7
         self.occupied_blocks = occupied_blocks
