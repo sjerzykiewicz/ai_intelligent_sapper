@@ -3,8 +3,8 @@ from collections import deque
 from queue import PriorityQueue
 import sys
 
-from bfs_state import BFSState
-from a_star_state import AStarState
+from search_states.bfs_state import BFSState
+from search_states.a_star_state import AStarState
 
 
 class Sapper:
