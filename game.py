@@ -1,5 +1,6 @@
 import pygame
 from sappers.standard_sapper import StandardSapper
+from sappers.rain_defusing_sapper import RainDefusingSapper
 import sys
 from screen_drawer import ScreenDrawer
 from random import choices, randint
@@ -59,10 +60,10 @@ class Game:
         place_for_goal = self._get_place_for_goal()
         place_for_sapper = self._get_place_for_sapper()
 
-        sapper_path = "gfx/sapper/sapper.png"
+        sapper_type = self._get_sapper_type()
+
         self.sapper = StandardSapper(
             place_for_sapper,
-            sapper_path,
             self.BLOCK_SIZE,
             (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
             self.occupied_blocks,
@@ -70,6 +71,17 @@ class Game:
             self.bomb_types,
             place_for_goal,
         )
+
+        if sapper_type == "rain_defusing_sapper":
+            self.sapper = RainDefusingSapper(
+                place_for_sapper,
+                self.BLOCK_SIZE,
+                (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
+                self.occupied_blocks,
+                self.surfaces_types,
+                self.bomb_types,
+                place_for_goal,
+            )
 
         self.weather, self.time = self._get_weather_and_time()
 
@@ -305,3 +317,9 @@ class Game:
         time = choices(time_choices, weights=time_weights, k=1)[0]
 
         return weather, time
+
+    def _get_sapper_type(self):
+        sapper_choices = ["sapper", "rain_defusing_sapper"]
+        sapper_weights = [70, 30]
+        sapper = choices(sapper_choices, weights=sapper_weights, k=1)[0]
+        return sapper
