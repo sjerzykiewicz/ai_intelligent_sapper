@@ -285,6 +285,9 @@ class Sapper:
             elif self.surfaces_types[cur_x][cur_y] == "sand":
                 ticks = 200
 
+            if self.bombs[cur_x][cur_y]:
+                ticks += 300
+
             while True:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -322,5 +325,8 @@ class Sapper:
                 answer += 5
             elif self.surfaces_types[cur_x][cur_y] == "sand":
                 answer += 25
+
+            if self.bombs[cur_x][cur_y]:
+                answer += 50
 
         return answer

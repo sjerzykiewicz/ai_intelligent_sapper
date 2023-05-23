@@ -162,7 +162,7 @@ class Game:
             for _ in range(self.WINDOW_WIDTH // self.BLOCK_SIZE)
         ]
         types_of_bombs = ["none", "claymore", "landmine", "hcb"]
-        weights = [400, 50, 30, 20]
+        weights = [500, 50, 30, 20]
         for x in range(0, self.WINDOW_WIDTH, self.BLOCK_SIZE):
             for y in range(0, self.WINDOW_HEIGHT, self.BLOCK_SIZE):
                 i, j = x // self.BLOCK_SIZE, y // self.BLOCK_SIZE
