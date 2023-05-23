@@ -60,7 +60,7 @@ class Game:
         place_for_goal = self._get_place_for_goal()
         place_for_sapper = self._get_place_for_sapper()
 
-        sapper_type = self._get_sapper_type()
+        self.sapper_type = self._get_sapper_type()
 
         self.sapper = StandardSapper(
             place_for_sapper,
@@ -72,7 +72,7 @@ class Game:
             place_for_goal,
         )
 
-        if sapper_type == "rain_defusing_sapper":
+        if self.sapper_type == "rain_defusing_sapper":
             self.sapper = RainDefusingSapper(
                 place_for_sapper,
                 self.BLOCK_SIZE,
