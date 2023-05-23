@@ -297,7 +297,7 @@ class Game:
 
     def _get_weather_and_time(self):
         weather_choices = ["sunny", "rainy"]
-        weather_weights = [80, 2000]
+        weather_weights = [80, 20]
         time_choices = ["day", "night"]
         time_weights = [80, 20]
 
