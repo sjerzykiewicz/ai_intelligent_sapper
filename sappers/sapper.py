@@ -8,7 +8,7 @@ from search_states.a_star_state import AStarState
 
 
 class Sapper:
-    def __init__(self, pos, img, block_size, win_size, occupied_blocks, surfaces_types, bombs):
+    def __init__(self, pos, img, block_size, win_size, occupied_blocks, surfaces_types, bombs, goal):
         self.speed = 10
         self.can_defuse_in_rain = False
         self.bombs_that_can_defuse = []
@@ -18,12 +18,15 @@ class Sapper:
         self.bombs = bombs
 
         self.surf = pygame.image.load(img).convert_alpha()
-        self.rect = self.surf.get_rect(topleft=pos)
+        i, j = pos
+        x, y = i * block_size, j * block_size
+        self.rect = self.surf.get_rect(topleft=(x, y))
         self.origin_surf = self.surf
         self.block_size = block_size
         self.win_x, self.win_y = win_size
         self.angle = 0
-        self.goal = (1, 1, 0)
+        x, y = goal
+        self.goal = x, y, 0
 
         self.slowing_power = self._get_slowing_power()
 

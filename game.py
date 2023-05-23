@@ -53,19 +53,23 @@ class Game:
 
         self.bombs, self.bomb_types = self._create_bombs()
 
+        self.flag_path = "gfx/flags/flag.png"
+        self.flag_surf = pygame.image.load(self.flag_path).convert_alpha()
+
+        place_for_goal = self._get_place_for_goal()
+        place_for_sapper = self._get_place_for_sapper()
+
         sapper_path = "gfx/sapper/sapper.png"
         self.sapper = StandardSapper(
-            (576, 672),
+            place_for_sapper,
             sapper_path,
             self.BLOCK_SIZE,
             (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
             self.occupied_blocks,
             self.surfaces_types,
             self.bomb_types,
+            place_for_goal,
         )
-
-        self.flag_path = "gfx/flags/flag.png"
-        self.flag_surf = pygame.image.load(self.flag_path).convert_alpha()
 
         self.screen_drawer = ScreenDrawer(
             self.sapper,
@@ -272,3 +276,15 @@ class Game:
                 barrels.append([self.barrel_surf, rect])
                 self.occupied_blocks.add((x, y))
         return barrels
+
+    def _get_place_for_goal(self):
+        for x in range(1, self.WINDOW_WIDTH // self.BLOCK_SIZE - 1):
+            for y in range(1, self.WINDOW_HEIGHT // self.BLOCK_SIZE - 1):
+                if (x, y) not in self.occupied_blocks:
+                    return x, y
+            
+    def _get_place_for_sapper(self):
+        for x in range(self.WINDOW_WIDTH // self.BLOCK_SIZE - 1, 0, -1):
+            for y in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE - 1, 0, -1):
+                if (x, y) not in self.occupied_blocks and not self.bomb_types[x][y]:
+                    return x, y

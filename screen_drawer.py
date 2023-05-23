@@ -69,8 +69,8 @@ class ScreenDrawer:
             self.screen.blit(barrel, rect)
 
     def _draw_goal(self) -> None:
-        goal = self.sapper.get_goal()
-        x, y = goal[0] * self.BLOCK_SIZE, goal[1] * self.BLOCK_SIZE
-        if (goal[0], goal[1]) not in self.occupied_blocks:
+        i, j, _ = self.sapper.get_goal()
+        x, y = i * self.BLOCK_SIZE, j * self.BLOCK_SIZE
+        if (i, j) not in self.occupied_blocks:
             flag_rect = self.flag_surf.get_rect(topleft=(x, y))
             self.screen.blit(self.flag_surf, flag_rect)
