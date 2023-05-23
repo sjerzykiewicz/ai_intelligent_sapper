@@ -2,7 +2,7 @@ import pygame
 from sappers.standard_sapper import StandardSapper
 import sys
 from screen_drawer import ScreenDrawer
-from random import choices
+from random import choices, randint
 
 
 class Game:
@@ -29,8 +29,6 @@ class Game:
 
         self.surfaces, self.surfaces_types = self._create_grid_surfaces()
 
-        landmine_path = "gfx/bombs/landmine.png"
-        self.landmine_surf = pygame.image.load(landmine_path).convert_alpha()
         rows, columns = (
             self.WINDOW_WIDTH // self.BLOCK_SIZE,
             self.WINDOW_HEIGHT // self.BLOCK_SIZE,
@@ -47,6 +45,17 @@ class Game:
         self.fence_corner_3 = pygame.image.load("gfx/fence/fence_5.png").convert_alpha()
         self.fence_corner_4 = pygame.image.load("gfx/fence/fence_6.png").convert_alpha()
         self.fence = self._create_fence()
+
+        barrel_path = "gfx/barrels/barrel.png"
+        self.barrel_surf = pygame.image.load(barrel_path).convert_alpha()
+        self.barrels = self._create_barrels()
+
+        landmine_path = "gfx/bombs/landmine.png"
+        self.landmine_surf = pygame.image.load(landmine_path).convert_alpha()
+        claymore_path = "gfx/bombs/claymore.png"
+        self.claymore_surf = pygame.image.load(claymore_path).convert_alpha()
+        hcb = "gfx/bombs/hcb.png"
+        self.hcb_surf = pygame.image.load(hcb).convert_alpha()
 
         sapper_path = "gfx/sapper/sapper.png"
         self.sapper = StandardSapper(
@@ -74,6 +83,7 @@ class Game:
             self.is_landmine_here,
             self.occupied_blocks,
             self.fence,
+            self.barrels,
         )
 
     def run(self) -> None:
@@ -238,3 +248,14 @@ class Game:
         )
 
         return fence
+    
+    def _create_barrels(self) -> list[list]:
+        barrels = []
+        for _ in range(20):
+            x = randint(0, self.WINDOW_WIDTH // self.BLOCK_SIZE - 1)
+            y = randint(0, self.WINDOW_HEIGHT // self.BLOCK_SIZE - 1)
+            if (x, y) not in self.occupied_blocks:
+                rect = self.barrel_surf.get_rect(topleft=(x * self.BLOCK_SIZE, y * self.BLOCK_SIZE))
+                barrels.append([self.barrel_surf, rect])
+                self.occupied_blocks.add((x, y))
+        return barrels

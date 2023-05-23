@@ -19,6 +19,7 @@ class ScreenDrawer:
         is_landmine_here,
         occupied_blocks,
         fence,
+        barrels,
     ):
         self.sapper = sapper
         self.screen = screen
@@ -32,6 +33,7 @@ class ScreenDrawer:
         self.is_landmine_here = is_landmine_here
         self.occupied_blocks = occupied_blocks
         self.fence = fence
+        self.barrels = barrels
 
     def draw_screen(self) -> None:
         self._draw_screen()
@@ -43,6 +45,7 @@ class ScreenDrawer:
         self._draw_fence()
         self._draw_goal()
         self._draw_sapper()
+        self._draw_barrels()
 
         pygame.display.update()
 
@@ -64,6 +67,10 @@ class ScreenDrawer:
     def _draw_fence(self) -> None:
         for fence, rect in self.fence:
             self.screen.blit(fence, rect)
+
+    def _draw_barrels(self) -> None:
+        for barrel, rect in self.barrels:
+            self.screen.blit(barrel, rect)
 
     def _draw_goal(self) -> None:
         goal = self.sapper.get_goal()
