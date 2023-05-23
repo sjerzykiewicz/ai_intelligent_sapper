@@ -8,21 +8,25 @@ from search_states.a_star_state import AStarState
 
 
 class Sapper:
-    def __init__(self, pos, img, block_size, win_size, occupied_blocks, surfaces_types):
+    def __init__(self, pos, img, block_size, win_size, occupied_blocks, surfaces_types, bombs, goal):
         self.speed = 10
         self.can_defuse_in_rain = False
         self.bombs_that_can_defuse = []
         self.capacity = 7
         self.occupied_blocks = occupied_blocks
         self.surfaces_types = surfaces_types
+        self.bombs = bombs
 
         self.surf = pygame.image.load(img).convert_alpha()
-        self.rect = self.surf.get_rect(topleft=pos)
+        i, j = pos
+        x, y = i * block_size, j * block_size
+        self.rect = self.surf.get_rect(topleft=(x, y))
         self.origin_surf = self.surf
         self.block_size = block_size
         self.win_x, self.win_y = win_size
         self.angle = 0
-        self.goal = (1, 1, 0)
+        x, y = goal
+        self.goal = x, y, 0
 
         self.slowing_power = self._get_slowing_power()
 
@@ -99,6 +103,9 @@ class Sapper:
                     slowing_power[i][j] = 5
                 elif self.surfaces_types[i][j] == "sand":
                     slowing_power[i][j] = 25
+
+                if self.bombs[i][j]:
+                    slowing_power[i][j] += 50
         return slowing_power
 
     def _find_path_bfs(self) -> list:
@@ -281,6 +288,9 @@ class Sapper:
             elif self.surfaces_types[cur_x][cur_y] == "sand":
                 ticks = 200
 
+            if self.bombs[cur_x][cur_y]:
+                ticks += 300
+
             while True:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -319,4 +329,18 @@ class Sapper:
             elif self.surfaces_types[cur_x][cur_y] == "sand":
                 answer += 25
 
+            if self.bombs[cur_x][cur_y]:
+                answer += 50
+
         return answer
+    
+    def _get_bombs_to_neutralize(self) -> list:
+        x_goal, y_goal, _ = self.get_goal()
+        bombs_to_neutralize = []
+        for i in range(-5, 5):
+            for j in range(-5, 5):
+                x, y = x_goal + i, y_goal + j
+                if 0 <= x < len(self.bombs) and 0 <= y < len(self.bombs[0]) and self.bombs[x][y]:
+                    bombs_to_neutralize.append((x, y))
+
+        return bombs_to_neutralize
