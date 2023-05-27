@@ -307,45 +307,14 @@ class Sapper:
                     last_tick = pygame.time.get_ticks()
                     break
 
-    def _get_time_to_move(self, actions: list) -> int:
-        cur_x, cur_y = self.get_pos()
-        cur_angle = self.get_angle()
-        answer = 0
-
-        for action in actions:
-            if action == "F":
-                if cur_angle == 0:
-                    cur_y -= 1
-                elif cur_angle == 90:
-                    cur_x -= 1
-                elif cur_angle == 180:
-                    cur_y += 1
-                elif cur_angle == 270:
-                    cur_x += 1
-            elif action == "L":
-                cur_angle = (cur_angle + 90) % 360
-            elif action == "R":
-                cur_angle = (cur_angle - 90) % 360
-
-            if self.surfaces_types[cur_x][cur_y] == "unpaved_road":
-                answer += 1
-            elif self.surfaces_types[cur_x][cur_y] == "grass":
-                answer += 5
-            elif self.surfaces_types[cur_x][cur_y] == "sand":
-                answer += 25
-
-            if self.bombs[cur_x][cur_y]:
-                answer += 50
-
-        return answer
     
     def _get_bombs_to_neutralize(self) -> list:
         x_goal, y_goal, _ = self.get_goal()
         bombs_to_neutralize = []
         for i in range(-5, 6):
             for j in range(-5, 6):
-                if i == x_goal and j == y_goal: continue
                 x, y = x_goal + i, y_goal + j
+                if x == x_goal and y == y_goal: continue
                 if 0 <= x < len(self.bombs) and 0 <= y < len(self.bombs[0]) and self.bombs[x][y]:
                     bombs_to_neutralize.append((x, y))
 

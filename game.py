@@ -132,8 +132,6 @@ class Game:
                     self.sapper.auto_move_bfs(self.screen_drawer)
                 if event.key == pygame.K_a:
                     self.sapper.auto_move_a_star(self.screen_drawer)
-                if event.key == pygame.K_t:
-                    self.sapper.time_bfs_and_a_star()
                 if event.key == pygame.K_c:
                     self.sapper.clear_the_site(self.screen_drawer)
                 if event.key == pygame.K_s:
