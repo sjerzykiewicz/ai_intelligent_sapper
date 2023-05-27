@@ -344,7 +344,7 @@ class Sapper:
         bombs_to_neutralize = []
         for i in range(-5, 6):
             for j in range(-5, 6):
-                if i == j: continue
+                if i == x_goal and j == y_goal: continue
                 x, y = x_goal + i, y_goal + j
                 if 0 <= x < len(self.bombs) and 0 <= y < len(self.bombs[0]) and self.bombs[x][y]:
                     bombs_to_neutralize.append((x, y))
