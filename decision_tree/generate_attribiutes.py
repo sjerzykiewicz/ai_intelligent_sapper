@@ -1,7 +1,7 @@
 from itertools import product
 
 posibilities = {
-    "dist_from_flag": ["<=10", ">10"],
+    "dist_from_flag": ["<=3", ">3"],
     "bomb_type": ["landmine", "claymore", "hcb"],
     "surface_type": ["unpaved_road", "grass", "sand"],
     "weather": ["sunny", "rainy"],
@@ -21,7 +21,7 @@ for perm in perms:
         perm["answer"] = "move"
     if perm["bomb_type"] == "claymore":
         perm["answer"] = "defuse"
-    if perm["dist_from_flag"] == "<=10":
+    if perm["dist_from_flag"] == "<=3":
         perm["answer"] = "move"
     if perm["weather"] == "rainy":
         perm["answer"] = "move"

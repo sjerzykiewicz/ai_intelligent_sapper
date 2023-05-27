@@ -104,6 +104,7 @@ class Game:
             self.barrels,
             self.weather,
             self.time,
+            self.bomb_types,
         )
 
     def run(self) -> None:
@@ -199,13 +200,13 @@ class Game:
                     continue
                 elif choice == "claymore":
                     rect = self.claymore_surf.get_rect(topleft=(x, y))
-                    bombs.append([self.claymore_surf, rect])
+                    bombs.append([self.claymore_surf, rect, (i, j)])
                 elif choice == "landmine":
                     rect = self.landmine_surf.get_rect(topleft=(x, y))
-                    bombs.append([self.landmine_surf, rect])
+                    bombs.append([self.landmine_surf, rect, (i, j)])
                 elif choice == "hcb":
                     rect = self.hcb_surf.get_rect(topleft=(x, y))
-                    bombs.append([self.hcb_surf, rect])
+                    bombs.append([self.hcb_surf, rect, (i, j)])
 
                 bombs_types[i][j] = choice
 

@@ -22,6 +22,7 @@ class ScreenDrawer:
         barrels,
         weather,
         time,
+        bomb_types,
     ):
         self.sapper = sapper
         self.screen = screen
@@ -38,6 +39,7 @@ class ScreenDrawer:
         self.barrels = barrels
         self.weather = weather
         self.time = time
+        self.bomb_types = bomb_types
 
         self.weather_filter = pygame.Surface((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         self.weather_filter.fill((0, 0, 0))
@@ -74,8 +76,9 @@ class ScreenDrawer:
         self.screen.blit(self.sapper.get_surf(), self.sapper.get_rect())
 
     def _draw_bombs(self) -> None:
-        for bomb, rect in self.bombs:
-            self.screen.blit(bomb, rect)
+        for bomb, rect, (x, y) in self.bombs:
+            if self.bomb_types[x][y]:
+                self.screen.blit(bomb, rect)
 
     def _draw_grid(self) -> None:
         for surface, rect in self.surfaces:
