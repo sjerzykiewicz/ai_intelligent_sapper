@@ -61,6 +61,7 @@ class Game:
         place_for_sapper = self._get_place_for_sapper()
 
         self.sapper_type = self._get_sapper_type()
+        self.weather, self.time = self._get_weather_and_time()
 
         self.sapper = StandardSapper(
             place_for_sapper,
@@ -70,6 +71,8 @@ class Game:
             self.surfaces_types,
             self.bomb_types,
             place_for_goal,
+            self.weather,
+            self.time,
         )
 
         if self.sapper_type == "rain_defusing_sapper":
@@ -81,9 +84,9 @@ class Game:
                 self.surfaces_types,
                 self.bomb_types,
                 place_for_goal,
+                self.weather,
+                self.time,
             )
-
-        self.weather, self.time = self._get_weather_and_time()
 
         self.screen_drawer = ScreenDrawer(
             self.sapper,
@@ -130,6 +133,8 @@ class Game:
                     self.sapper.auto_move_a_star(self.screen_drawer)
                 if event.key == pygame.K_t:
                     self.sapper.time_bfs_and_a_star()
+                if event.key == pygame.K_c:
+                    self.sapper.clear_the_site(self.screen_drawer)
                 if event.key == pygame.K_s:
                     x, y = pygame.mouse.get_pos()
                     x //= self.BLOCK_SIZE
