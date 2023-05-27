@@ -1,0 +1,122 @@
+bomb_type
+	claymore
+		is_low_temp
+			no
+				is_barrel_nearby
+					no
+						time_of_day
+							day
+								dist_from_flag
+									<=10
+										weather
+											rainy
+												sapper_type
+													rain_defusing -> ['defuse']
+													standard -> ['move']
+											sunny -> ['move']
+									>10
+										weather
+											rainy
+												sapper_type
+													rain_defusing -> ['defuse']
+													standard -> ['move']
+											sunny -> ['defuse']
+							night -> ['defuse']
+					yes
+						weather
+							rainy
+								sapper_type
+									rain_defusing -> ['defuse']
+									standard -> ['move']
+							sunny -> ['move']
+			yes
+				time_of_day
+					day
+						is_barrel_nearby
+							no
+								dist_from_flag
+									<=10
+										weather
+											rainy
+												sapper_type
+													rain_defusing -> ['defuse']
+													standard -> ['move']
+											sunny -> ['move']
+									>10
+										weather
+											rainy
+												sapper_type
+													rain_defusing -> ['defuse']
+													standard -> ['move']
+											sunny -> ['defuse']
+							yes -> ['defuse']
+					night -> ['defuse']
+	hcb -> ['move']
+	landmine
+		is_low_temp
+			no
+				is_barrel_nearby
+					no
+						time_of_day
+							day
+								sapper_type
+									rain_defusing
+										weather
+											rainy -> ['defuse']
+											sunny
+												dist_from_flag
+													<=10 -> ['move']
+													>10
+														surface_type
+															grass -> ['defuse']
+															sand -> ['defuse']
+															unpaved_road -> ['move']
+									standard
+										dist_from_flag
+											<=10 -> ['move']
+											>10
+												weather
+													rainy -> ['move']
+													sunny
+														surface_type
+															grass -> ['defuse']
+															sand -> ['defuse']
+															unpaved_road -> ['move']
+							night -> ['defuse']
+					yes
+						weather
+							rainy
+								sapper_type
+									rain_defusing -> ['defuse']
+									standard -> ['move']
+							sunny -> ['move']
+			yes
+				time_of_day
+					day
+						is_barrel_nearby
+							no
+								sapper_type
+									rain_defusing
+										weather
+											rainy -> ['defuse']
+											sunny
+												dist_from_flag
+													<=10 -> ['move']
+													>10
+														surface_type
+															grass -> ['defuse']
+															sand -> ['defuse']
+															unpaved_road -> ['move']
+									standard
+										dist_from_flag
+											<=10 -> ['move']
+											>10
+												weather
+													rainy -> ['move']
+													sunny
+														surface_type
+															grass -> ['defuse']
+															sand -> ['defuse']
+															unpaved_road -> ['move']
+							yes -> ['defuse']
+					night -> ['defuse']
