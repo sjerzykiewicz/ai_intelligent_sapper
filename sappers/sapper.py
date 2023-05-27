@@ -371,7 +371,8 @@ class Sapper:
             self._move_to_flag(screen_drawer)
 
     def _defuse(self) -> None:
-        ticks = 1000
+        x, y = self.get_pos()
+        ticks = 1500
         while True:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -382,6 +383,9 @@ class Sapper:
                 if pygame.time.get_ticks() - last_tick >= ticks:
                     last_tick = pygame.time.get_ticks()
                     break
+        self.slowing_power[x][y] -= 50
 
     def _move_to_flag(self, screen_drawer) -> None:
+        x, y = self.get_pos()
+        self.slowing_power[x][y] -= 50
         self._auto_sapper_move(self._find_path_a_star(), screen_drawer)
