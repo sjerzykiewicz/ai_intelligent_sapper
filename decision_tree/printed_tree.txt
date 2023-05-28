@@ -8,18 +8,15 @@ bomb_type
 							day
 								dist_from_flag
 									<=3
-										weather
-											rainy
-												sapper_type
-													rain_defusing -> ['defuse']
-													standard -> ['move']
-											sunny -> ['move']
+										sapper_type
+											rain_defusing
+												weather
+													rainy -> ['defuse']
+													sunny -> ['move']
+											standard -> ['move']
 									>3
 										weather
-											rainy
-												sapper_type
-													rain_defusing -> ['defuse']
-													standard -> ['move']
+											rainy -> ['move']
 											sunny -> ['defuse']
 							night -> ['defuse']
 					yes -> ['move']
@@ -30,12 +27,10 @@ bomb_type
 							no
 								sapper_type
 									rain_defusing
-										dist_from_flag
-											<=3
-												weather
-													rainy -> ['defuse']
-													sunny -> ['move']
-											>3 -> ['defuse']
+										surface_type
+											grass -> ['move']
+											sand -> ['defuse']
+											unpaved_road -> ['defuse']
 									standard -> ['move']
 							yes -> ['defuse']
 					night -> ['defuse']
@@ -67,13 +62,7 @@ bomb_type
 						is_barrel_nearby
 							no
 								surface_type
-									grass
-										weather
-											rainy
-												sapper_type
-													rain_defusing -> ['defuse']
-													standard -> ['move']
-											sunny -> ['defuse']
+									grass -> ['defuse']
 									sand
 										dist_from_flag
 											<=3 -> ['move']
@@ -82,11 +71,8 @@ bomb_type
 													rainy -> ['move']
 													sunny -> ['defuse']
 									unpaved_road
-										dist_from_flag
-											<=3
-												weather
-													rainy -> ['defuse']
-													sunny -> ['move']
-											>3 -> ['move']
+										weather
+											rainy -> ['defuse']
+											sunny -> ['move']
 							yes -> ['defuse']
 					night -> ['defuse']
