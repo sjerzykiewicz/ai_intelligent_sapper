@@ -1,11 +1,18 @@
 import pandas as pd
+import dill
 import math
 import numpy as np
-from decision_tree.decision_tree_node import TreeNode
+
+
+class TreeNode:
+    def __init__(self):
+        self.children = []
+        self.value = ""
+        self.isLeaf = False
+        self.pred = ""
 
 
 class DecisionTree:
-
     def __init__(self):
         data = pd.read_csv("decision_tree/input.csv")
         features = [feat for feat in data]
@@ -33,7 +40,6 @@ class DecisionTree:
             n = neg / (pos + neg)
             return -(p * math.log(p, 2) + n * math.log(n, 2))
 
-
     def _info_gain(self, examples, attr):
         uniq = np.unique(examples[attr])
         gain = self._entropy(examples)
@@ -42,7 +48,6 @@ class DecisionTree:
             sub_e = self._entropy(subdata)
             gain -= (float(len(subdata)) / float(len(examples))) * sub_e
         return gain
-
 
     def _id3(self, examples, attrs):
         root = TreeNode()
@@ -75,10 +80,9 @@ class DecisionTree:
 
         return root
 
-
     def _printTree(self, root: TreeNode, depth=0):
         with open(self.file_path, "a") as file:
-            for i in range(depth):
+            for _ in range(depth):
                 file.write("\t")
             file.write(root.value)
             if root.isLeaf:
@@ -87,7 +91,6 @@ class DecisionTree:
             file.write("\n")
         for child in root.children:
             self._printTree(child, depth + 1)
-
 
     def _classify(self, root, new):
         for child in root.children:
@@ -99,3 +102,9 @@ class DecisionTree:
 
     def get_decision(self, new):
         return self._classify(self.root, new)
+
+
+if __name__ == "__main__":
+    dt = DecisionTree()
+    with open("decision_tree/decision_tree.joblib", "wb") as f:
+        dill.dump(dt, f)

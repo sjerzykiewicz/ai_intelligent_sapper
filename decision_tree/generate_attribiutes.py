@@ -27,22 +27,25 @@ for perm in perms:
         perm["answer"] = "move"
     if perm["time_of_day"] == "night":
         perm["answer"] = "defuse"
+    if perm["sapper_type"] == "rain_defusing":
+        if perm["weather"] == "rainy":
+            perm["answer"] = "defuse"
     if perm["is_barrel_nearby"] == "yes":
         if perm["is_low_temp"] == "yes":
             perm["answer"] = "defuse"
         else:
             perm["answer"] = "move"
-    if perm["sapper_type"] == "rain_defusing":
-        if perm["weather"] == "rainy":
-            perm["answer"] = "defuse"
     if perm["bomb_type"] == "hcb":
         perm["answer"] = "move"
 
-with open("input.csv", "w") as f:
+with open("./input.csv", "w") as f:
     f.write(
         "dist_from_flag,bomb_type,surface_type,weather,time_of_day,is_barrel_nearby,sapper_type,is_low_temp,answer\n"
     )
+    cnt = 0
     for perm in perms:
-        f.write(
-            f'{perm["dist_from_flag"]},{perm["bomb_type"]},{perm["surface_type"]},{perm["weather"]},{perm["time_of_day"]},{perm["is_barrel_nearby"]},{perm["sapper_type"]},{perm["is_low_temp"]},{perm["answer"]}\n'
-        )
+        if cnt % 2 == 0:
+            f.write(
+                f'{perm["dist_from_flag"]},{perm["bomb_type"]},{perm["surface_type"]},{perm["weather"]},{perm["time_of_day"]},{perm["is_barrel_nearby"]},{perm["sapper_type"]},{perm["is_low_temp"]},{perm["answer"]}\n'
+            )
+        cnt += 1

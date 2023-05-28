@@ -1,15 +1,30 @@
 import pygame
+import dill
 from collections import deque
 from queue import PriorityQueue
 import sys
 
 from search_states.bfs_state import BFSState
 from search_states.a_star_state import AStarState
+
 from decision_tree.decision_tree import DecisionTree
 
 
 class Sapper:
-    def __init__(self, pos, img, block_size, win_size, occupied_blocks, surfaces_types, goal, weather, time_of_day, bombs, is_low_temp):
+    def __init__(
+        self,
+        pos,
+        img,
+        block_size,
+        win_size,
+        occupied_blocks,
+        surfaces_types,
+        goal,
+        weather,
+        time_of_day,
+        bombs,
+        is_low_temp,
+    ):
         self.speed = 10
         self.can_defuse_in_rain = False
         self.bombs_that_can_defuse = []
@@ -20,7 +35,7 @@ class Sapper:
         self.time_of_day = time_of_day
         self.bombs = bombs
         self.is_low_temp = is_low_temp
-        self.decision_tree = DecisionTree()
+        self.decision_tree = self._deserialise_decision_tree()
 
         self.surf = pygame.image.load(img).convert_alpha()
         i, j = pos
@@ -300,15 +315,19 @@ class Sapper:
                     last_tick = pygame.time.get_ticks()
                     break
 
-    
     def _get_bombs_to_neutralize(self) -> list:
         x_goal, y_goal, _ = self.get_goal()
         bombs_to_neutralize = []
         for i in range(-5, 6):
             for j in range(-5, 6):
                 x, y = x_goal + i, y_goal + j
-                if x == x_goal and y == y_goal: continue
-                if 0 <= x < len(self.bombs) and 0 <= y < len(self.bombs[0]) and self.bombs[x][y]:
+                if x == x_goal and y == y_goal:
+                    continue
+                if (
+                    0 <= x < len(self.bombs)
+                    and 0 <= y < len(self.bombs[0])
+                    and self.bombs[x][y]
+                ):
                     for bomb in self.bombs[x][y]:
                         bombs_to_neutralize.append((x, y, bomb))
 
@@ -322,16 +341,29 @@ class Sapper:
 
     def _neutralize_bomb(self, screen_drawer, x, y, bomb) -> None:
         # new = {'dist_from_flag':'>=10', 'bomb_type':'claymore','surface_type':'unpaved_road','weather':'rainy','time_of_day':'night','is_barrel_nearby':'yes', 'sapper_type':'standard','is_low_temp':'no'}
-        distance_to_flag = abs(self.get_pos()[0] - self.get_goal()[0]) + abs(self.get_pos()[1] - self.get_goal()[1])
+        distance_to_flag = abs(self.get_pos()[0] - self.get_goal()[0]) + abs(
+            self.get_pos()[1] - self.get_goal()[1]
+        )
         dist = ">=3" if distance_to_flag >= 3 else "<3"
         bomb_type = bomb[2]
         surface_type = self.surfaces_types[x][y]
         weather = self.weather
         time_of_day = self.time_of_day
-        is_occupied_block_nearby = "yes" if self._is_occupied_block_nearby(x, y) else "no"
+        is_occupied_block_nearby = (
+            "yes" if self._is_occupied_block_nearby(x, y) else "no"
+        )
         sapper_type = "rain_defusing" if self.can_defuse_in_rain else "standard"
         is_low_temp = self.is_low_temp
-        cur_state = {"dist_from_flag": dist, "bomb_type": bomb_type, "surface_type": surface_type, "weather": weather, "time_of_day": time_of_day, "is_barrel_nearby": is_occupied_block_nearby, "sapper_type": sapper_type, "is_low_temp": is_low_temp}
+        cur_state = {
+            "dist_from_flag": dist,
+            "bomb_type": bomb_type,
+            "surface_type": surface_type,
+            "weather": weather,
+            "time_of_day": time_of_day,
+            "is_barrel_nearby": is_occupied_block_nearby,
+            "sapper_type": sapper_type,
+            "is_low_temp": is_low_temp,
+        }
         action = self.decision_tree.get_decision(cur_state)
 
         if action == "defuse":
@@ -340,26 +372,29 @@ class Sapper:
             self._move_to_flag(screen_drawer, bomb)
 
     def _defuse(self, bomb) -> None:
+        last_tick = pygame.time.get_ticks()
         x, y = self.get_pos()
         ticks = 1500
         while True:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.display.quit()
-                        pygame.quit()
-                        sys.exit()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.display.quit()
+                    pygame.quit()
+                    sys.exit()
 
-                if pygame.time.get_ticks() - last_tick >= ticks:
-                    last_tick = pygame.time.get_ticks()
-                    break
+            if pygame.time.get_ticks() - last_tick >= ticks:
+                last_tick = pygame.time.get_ticks()
+                break
         self.bombs[x][y].remove(bomb)
-        if not self.bombs[x][y]: self.slowing_power[x][y] -= 50
+        if not self.bombs[x][y]:
+            self.slowing_power[x][y] -= 50
 
     def _move_to_flag(self, screen_drawer, bomb) -> None:
         x, y = self.get_pos()
         bomb_surf, _, choice = bomb
         self.bombs[x][y].remove(bomb)
-        if not self.bombs[x][y]: self.slowing_power[x][y] -= 50
+        if not self.bombs[x][y]:
+            self.slowing_power[x][y] -= 50
         self._auto_sapper_move(self._find_path_a_star(), screen_drawer)
 
         x, y = self.get_pos()
@@ -369,4 +404,13 @@ class Sapper:
         self.bombs[x][y].append([bomb_surf, rect, choice])
 
     def _is_occupied_block_nearby(self, x, y):
-        return (x-1, y) in self.occupied_blocks or (x+1, y) in self.occupied_blocks or (x, y-1) in self.occupied_blocks or (x, y+1) in self.occupied_blocks
+        return (
+            (x - 1, y) in self.occupied_blocks
+            or (x + 1, y) in self.occupied_blocks
+            or (x, y - 1) in self.occupied_blocks
+            or (x, y + 1) in self.occupied_blocks
+        )
+
+    def _deserialise_decision_tree(self) -> DecisionTree:
+        with open("decision_tree/decision_tree.joblib", "rb") as f:
+            return dill.load(f)
