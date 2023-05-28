@@ -93,12 +93,23 @@ class DecisionTree:
             self._printTree(child, depth + 1)
 
     def _classify(self, root, new):
-        for child in root.children:
-            if child.value == new[root.value]:
-                if child.isLeaf:
-                    return child.pred
-                else:
-                    self._classify(child.children[0], new)
+        # for child in root.children:
+        #     if child.value == new[root.value]:
+        #         if child.isLeaf:
+        #             print(child.pred)
+        #         else:
+        #             self._classify(child.children[0], new)
+        # return "Not found"
+
+        while len(root.children) > 0:
+            for child in root.children:
+                if child.value == new[root.value]:
+                    if child.isLeaf:
+                        root = child
+                    else:
+                        root = child.children[0]
+                    break
+        return root.pred
 
     def get_decision(self, new):
         return self._classify(self.root, new)

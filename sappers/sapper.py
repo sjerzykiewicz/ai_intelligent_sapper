@@ -344,7 +344,7 @@ class Sapper:
         distance_to_flag = abs(self.get_pos()[0] - self.get_goal()[0]) + abs(
             self.get_pos()[1] - self.get_goal()[1]
         )
-        dist = ">=3" if distance_to_flag >= 3 else "<3"
+        dist = "<=3" if distance_to_flag <= 3 else ">3"
         bomb_type = bomb[2]
         surface_type = self.surfaces_types[x][y]
         weather = self.weather
@@ -355,16 +355,17 @@ class Sapper:
         sapper_type = "rain_defusing" if self.can_defuse_in_rain else "standard"
         is_low_temp = self.is_low_temp
         cur_state = {
-            "dist_from_flag": dist,
             "bomb_type": bomb_type,
-            "surface_type": surface_type,
-            "weather": weather,
             "time_of_day": time_of_day,
             "is_barrel_nearby": is_occupied_block_nearby,
+            "dist_from_flag": dist,
+            "weather": weather,
             "sapper_type": sapper_type,
             "is_low_temp": is_low_temp,
+            "surface_type": surface_type,
         }
         action = self.decision_tree.get_decision(cur_state)
+        print(action)
 
         if action == "defuse":
             self._defuse(bomb)
@@ -374,7 +375,7 @@ class Sapper:
     def _defuse(self, bomb) -> None:
         last_tick = pygame.time.get_ticks()
         x, y = self.get_pos()
-        ticks = 1500
+        ticks = 2000
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
