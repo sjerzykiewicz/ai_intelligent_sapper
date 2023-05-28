@@ -28,21 +28,15 @@ bomb_type
 					day
 						is_barrel_nearby
 							no
-								dist_from_flag
-									<=3
-										weather
-											rainy
-												sapper_type
-													rain_defusing -> ['defuse']
-													standard -> ['move']
-											sunny -> ['move']
-									>3
-										weather
-											rainy
-												sapper_type
-													rain_defusing -> ['defuse']
-													standard -> ['move']
-											sunny -> ['defuse']
+								sapper_type
+									rain_defusing
+										dist_from_flag
+											<=3
+												weather
+													rainy -> ['defuse']
+													sunny -> ['move']
+											>3 -> ['defuse']
+									standard -> ['move']
 							yes -> ['defuse']
 					night -> ['defuse']
 	hcb -> ['move']
@@ -62,20 +56,9 @@ bomb_type
 													<=3 -> ['move']
 													>3
 														surface_type
-															grass -> ['defuse']
 															sand -> ['defuse']
 															unpaved_road -> ['move']
-									standard
-										dist_from_flag
-											<=3 -> ['move']
-											>3
-												weather
-													rainy -> ['move']
-													sunny
-														surface_type
-															grass -> ['defuse']
-															sand -> ['defuse']
-															unpaved_road -> ['move']
+									standard -> ['move']
 							night -> ['defuse']
 					yes -> ['move']
 			yes
@@ -83,28 +66,27 @@ bomb_type
 					day
 						is_barrel_nearby
 							no
-								sapper_type
-									rain_defusing
+								surface_type
+									grass
 										weather
-											rainy -> ['defuse']
-											sunny
-												dist_from_flag
-													<=3 -> ['move']
-													>3
-														surface_type
-															grass -> ['defuse']
-															sand -> ['defuse']
-															unpaved_road -> ['move']
-									standard
+											rainy
+												sapper_type
+													rain_defusing -> ['defuse']
+													standard -> ['move']
+											sunny -> ['defuse']
+									sand
 										dist_from_flag
 											<=3 -> ['move']
 											>3
 												weather
 													rainy -> ['move']
-													sunny
-														surface_type
-															grass -> ['defuse']
-															sand -> ['defuse']
-															unpaved_road -> ['move']
+													sunny -> ['defuse']
+									unpaved_road
+										dist_from_flag
+											<=3
+												weather
+													rainy -> ['defuse']
+													sunny -> ['move']
+											>3 -> ['move']
 							yes -> ['defuse']
 					night -> ['defuse']
