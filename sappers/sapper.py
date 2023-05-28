@@ -350,6 +350,14 @@ class Sapper:
 
     def _move_to_flag(self, screen_drawer, bomb) -> None:
         x, y = self.get_pos()
+        bomb_surf, _, choice = bomb
         self.bombs[x][y].remove(bomb)
         if not self.bombs[x][y]: self.slowing_power[x][y] -= 50
         self._auto_sapper_move(self._find_path_a_star(), screen_drawer)
+
+        x, y = self.get_pos()
+        rect = bomb_surf.get_rect(topleft=(x * self.block_size, y * self.block_size))
+        if not self.bombs[x][y]:
+            self.slowing_power[x][y] += 50
+        print(x, y, choice)
+        self.bombs[x][y].append([bomb_surf, rect, choice])
