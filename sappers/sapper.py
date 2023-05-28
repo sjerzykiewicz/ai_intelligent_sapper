@@ -17,7 +17,7 @@ class Sapper:
         self.occupied_blocks = occupied_blocks
         self.surfaces_types = surfaces_types
         self.weather = weather
-        self.time = time_of_day
+        self.time_of_day = time_of_day
         self.bombs = bombs
         self.is_low_temp = is_low_temp
         self.decision_tree = DecisionTree()
@@ -324,8 +324,14 @@ class Sapper:
         # new = {'dist_from_flag':'>=10', 'bomb_type':'claymore','surface_type':'unpaved_road','weather':'rainy','time_of_day':'night','is_barrel_nearby':'yes', 'sapper_type':'standard','is_low_temp':'no'}
         distance_to_flag = abs(self.get_pos()[0] - self.get_goal()[0]) + abs(self.get_pos()[1] - self.get_goal()[1])
         dist = ">=3" if distance_to_flag >= 3 else "<3"
-        # bomb_type = self.bombs[self.get_pos()[0]][self.get_pos()[1]]
-        cur_state = {"dist_from_flag": dist, "bomb_type": "claymore", "surface_type": "unpaved_road", "weather": "rainy", "time_of_day": "night", "is_barrel_nearby": "yes", "sapper_type": "standard", "is_low_temp": "no"}
+        bomb_type = bomb[2]
+        surface_type = self.surfaces_types[x][y]
+        weather = self.weather
+        time_of_day = self.time_of_day
+        is_occupied_block_nearby = "yes" if self._is_occupied_block_nearby(x, y) else "no"
+        sapper_type = "rain_defusing" if self.can_defuse_in_rain else "standard"
+        is_low_temp = self.is_low_temp
+        cur_state = {"dist_from_flag": dist, "bomb_type": bomb_type, "surface_type": surface_type, "weather": weather, "time_of_day": time_of_day, "is_barrel_nearby": is_occupied_block_nearby, "sapper_type": sapper_type, "is_low_temp": is_low_temp}
         action = self.decision_tree.get_decision(cur_state)
 
         if action == "defuse":
@@ -360,5 +366,7 @@ class Sapper:
         rect = bomb_surf.get_rect(topleft=(x * self.block_size, y * self.block_size))
         if not self.bombs[x][y]:
             self.slowing_power[x][y] += 50
-        print(x, y, choice)
         self.bombs[x][y].append([bomb_surf, rect, choice])
+
+    def _is_occupied_block_nearby(self, x, y):
+        return (x-1, y) in self.occupied_blocks or (x+1, y) in self.occupied_blocks or (x, y-1) in self.occupied_blocks or (x, y+1) in self.occupied_blocks
