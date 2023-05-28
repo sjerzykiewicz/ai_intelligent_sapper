@@ -1,0 +1,78 @@
+bomb_type
+	claymore
+		is_low_temp
+			no
+				is_barrel_nearby
+					no
+						time_of_day
+							day
+								dist_from_flag
+									<=3
+										sapper_type
+											rain_defusing
+												weather
+													rainy -> ['defuse']
+													sunny -> ['move']
+											standard -> ['move']
+									>3
+										weather
+											rainy -> ['move']
+											sunny -> ['defuse']
+							night -> ['defuse']
+					yes -> ['move']
+			yes
+				time_of_day
+					day
+						is_barrel_nearby
+							no
+								sapper_type
+									rain_defusing
+										surface_type
+											grass -> ['move']
+											sand -> ['defuse']
+											unpaved_road -> ['defuse']
+									standard -> ['move']
+							yes -> ['defuse']
+					night -> ['defuse']
+	hcb -> ['move']
+	landmine
+		is_low_temp
+			no
+				is_barrel_nearby
+					no
+						time_of_day
+							day
+								sapper_type
+									rain_defusing
+										weather
+											rainy -> ['defuse']
+											sunny
+												dist_from_flag
+													<=3 -> ['move']
+													>3
+														surface_type
+															sand -> ['defuse']
+															unpaved_road -> ['move']
+									standard -> ['move']
+							night -> ['defuse']
+					yes -> ['move']
+			yes
+				time_of_day
+					day
+						is_barrel_nearby
+							no
+								surface_type
+									grass -> ['defuse']
+									sand
+										dist_from_flag
+											<=3 -> ['move']
+											>3
+												weather
+													rainy -> ['move']
+													sunny -> ['defuse']
+									unpaved_road
+										weather
+											rainy -> ['defuse']
+											sunny -> ['move']
+							yes -> ['defuse']
+					night -> ['defuse']
