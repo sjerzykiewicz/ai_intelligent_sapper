@@ -3,7 +3,7 @@ from sappers.standard_sapper import StandardSapper
 from sappers.rain_defusing_sapper import RainDefusingSapper
 import sys
 from screen_drawer import ScreenDrawer
-from random import choices, randint
+from random import choices, randint, choice
 
 
 class Game:
@@ -62,6 +62,7 @@ class Game:
 
         self.sapper_type = self._get_sapper_type()
         self.weather, self.time = self._get_weather_and_time()
+        self.is_low_temperature = choice(["yes", "no"])
 
         self.sapper = StandardSapper(
             place_for_sapper,
@@ -73,6 +74,7 @@ class Game:
             self.weather,
             self.time,
             self.bombs,
+            self.is_low_temperature,
         )
 
         if self.sapper_type == "rain_defusing_sapper":
@@ -86,6 +88,7 @@ class Game:
                 self.weather,
                 self.time,
                 self.bombs,
+                self.is_low_temperature,
             )
 
         self.screen_drawer = ScreenDrawer(

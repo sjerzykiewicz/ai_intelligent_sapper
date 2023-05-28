@@ -9,7 +9,7 @@ from decision_tree.decision_tree import DecisionTree
 
 
 class Sapper:
-    def __init__(self, pos, img, block_size, win_size, occupied_blocks, surfaces_types, goal, weather, time_of_day, bombs,):
+    def __init__(self, pos, img, block_size, win_size, occupied_blocks, surfaces_types, goal, weather, time_of_day, bombs, is_low_temp):
         self.speed = 10
         self.can_defuse_in_rain = False
         self.bombs_that_can_defuse = []
@@ -19,6 +19,7 @@ class Sapper:
         self.weather = weather
         self.time = time_of_day
         self.bombs = bombs
+        self.is_low_temp = is_low_temp
         self.decision_tree = DecisionTree()
 
         self.surf = pygame.image.load(img).convert_alpha()
