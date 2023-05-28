@@ -52,7 +52,7 @@ class Game:
         hcb = "gfx/bombs/hcb.png"
         self.hcb_surf = pygame.image.load(hcb).convert_alpha()
 
-        self.bombs, self.bomb_types = self._create_bombs()
+        self.bombs = self._create_bombs()
 
         self.flag_path = "gfx/flags/flag.png"
         self.flag_surf = pygame.image.load(self.flag_path).convert_alpha()
@@ -69,10 +69,10 @@ class Game:
             (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
             self.occupied_blocks,
             self.surfaces_types,
-            self.bomb_types,
             place_for_goal,
             self.weather,
             self.time,
+            self.bombs,
         )
 
         if self.sapper_type == "rain_defusing_sapper":
@@ -82,10 +82,10 @@ class Game:
                 (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
                 self.occupied_blocks,
                 self.surfaces_types,
-                self.bomb_types,
                 place_for_goal,
                 self.weather,
                 self.time,
+                self.bombs,
             )
 
         self.screen_drawer = ScreenDrawer(
@@ -98,13 +98,12 @@ class Game:
             self.BLOCK_SIZE,
             self.WINDOW_WIDTH,
             self.WINDOW_HEIGHT,
-            self.bombs,
             self.occupied_blocks,
             self.fence,
             self.barrels,
             self.weather,
             self.time,
-            self.bomb_types,
+            self.bombs,
         )
 
     def run(self) -> None:
@@ -180,9 +179,8 @@ class Game:
 
     # this method is called only once during the initialization of the game
     def _create_bombs(self) -> tuple[list[list[pygame.Surface]], list[list[str]]]:
-        bombs = []
-        bombs_types = [
-            [None for _ in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE)]
+        bombs = [
+            [[] for _ in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE)]
             for _ in range(self.WINDOW_WIDTH // self.BLOCK_SIZE)
         ]
         types_of_bombs = ["none", "claymore", "landmine", "hcb"]
@@ -198,17 +196,15 @@ class Game:
                     continue
                 elif choice == "claymore":
                     rect = self.claymore_surf.get_rect(topleft=(x, y))
-                    bombs.append([self.claymore_surf, rect, (i, j)])
+                    bombs[i][j].append([self.claymore_surf, rect, choice])
                 elif choice == "landmine":
                     rect = self.landmine_surf.get_rect(topleft=(x, y))
-                    bombs.append([self.landmine_surf, rect, (i, j)])
+                    bombs[i][j].append([self.landmine_surf, rect, choice])
                 elif choice == "hcb":
                     rect = self.hcb_surf.get_rect(topleft=(x, y))
-                    bombs.append([self.hcb_surf, rect, (i, j)])
+                    bombs[i][j].append([self.hcb_surf, rect, choice])
 
-                bombs_types[i][j] = choice
-
-        return bombs, bombs_types
+        return bombs
 
     # this method is called only once during the initialization of the game
     def _create_fence(self) -> list[list]:
@@ -308,7 +304,7 @@ class Game:
     def _get_place_for_sapper(self):
         for x in range(self.WINDOW_WIDTH // self.BLOCK_SIZE - 1, 0, -1):
             for y in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE - 1, 0, -1):
-                if (x, y) not in self.occupied_blocks and not self.bomb_types[x][y]:
+                if (x, y) not in self.occupied_blocks and not self.bombs[x][y]:
                     return x, y
 
     def _get_weather_and_time(self):
