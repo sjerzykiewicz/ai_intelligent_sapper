@@ -1,4 +1,4 @@
-from landmine import Landmine
+from bombs.landmine import Landmine
 
 
 class Claymore(Landmine):

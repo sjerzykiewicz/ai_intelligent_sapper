@@ -1,8 +1,9 @@
 import pygame
-from sapper import Sapper
+from sappers.standard_sapper import StandardSapper
+from sappers.rain_defusing_sapper import RainDefusingSapper
 import sys
 from screen_drawer import ScreenDrawer
-from random import choices
+from random import choices, randint, choice
 
 
 class Game:
@@ -29,14 +30,6 @@ class Game:
 
         self.surfaces, self.surfaces_types = self._create_grid_surfaces()
 
-        landmine_path = "gfx/bombs/landmine.png"
-        self.landmine_surf = pygame.image.load(landmine_path).convert_alpha()
-        rows, columns = (
-            self.WINDOW_WIDTH // self.BLOCK_SIZE,
-            self.WINDOW_HEIGHT // self.BLOCK_SIZE,
-        )
-        self.is_landmine_here = [[False for _ in range(columns)] for _ in range(rows)]
-
         self.occupied_blocks = set()
         self.fence_vertical = pygame.image.load("gfx/fence/fence_1.png").convert_alpha()
         self.fence_horizontal = pygame.image.load(
@@ -48,18 +41,59 @@ class Game:
         self.fence_corner_4 = pygame.image.load("gfx/fence/fence_6.png").convert_alpha()
         self.fence = self._create_fence()
 
-        sapper_path = "gfx/sapper/sapper.png"
-        self.sapper = Sapper(
-            (576, 672),
-            sapper_path,
+        barrel_path = "gfx/barrels/barrel.png"
+        self.barrel_surf = pygame.image.load(barrel_path).convert_alpha()
+        self.barrels = self._create_barrels()
+
+        landmine_path = "gfx/bombs/landmine.png"
+        self.landmine_surf = pygame.image.load(landmine_path).convert_alpha()
+        claymore_path = "gfx/bombs/claymore.png"
+        self.claymore_surf = pygame.image.load(claymore_path).convert_alpha()
+        hcb = "gfx/bombs/hcb.png"
+        self.hcb_surf = pygame.image.load(hcb).convert_alpha()
+
+        self.bombs = self._create_bombs()
+
+        self.flag_path = "gfx/flags/flag.png"
+        self.flag_surf = pygame.image.load(self.flag_path).convert_alpha()
+
+        place_for_goal = self._get_place_for_goal()
+        place_for_sapper = self._get_place_for_sapper()
+
+        self.sapper_type = self._get_sapper_type()
+        self.weather, self.time = self._get_weather_and_time()
+        self.is_low_temperature = choice(["yes", "no"])
+        if self.is_low_temperature == "yes":
+            print("Low temperature!")
+        else:
+            print("Normal temperature!")
+
+        self.sapper = StandardSapper(
+            place_for_sapper,
             self.BLOCK_SIZE,
             (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
             self.occupied_blocks,
             self.surfaces_types,
+            place_for_goal,
+            self.weather,
+            self.time,
+            self.bombs,
+            self.is_low_temperature,
         )
 
-        self.flag_path = "gfx/flags/flag.png"
-        self.flag_surf = pygame.image.load(self.flag_path).convert_alpha()
+        if self.sapper_type == "rain_defusing_sapper":
+            self.sapper = RainDefusingSapper(
+                place_for_sapper,
+                self.BLOCK_SIZE,
+                (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
+                self.occupied_blocks,
+                self.surfaces_types,
+                place_for_goal,
+                self.weather,
+                self.time,
+                self.bombs,
+                self.is_low_temperature,
+            )
 
         self.screen_drawer = ScreenDrawer(
             self.sapper,
@@ -71,9 +105,12 @@ class Game:
             self.BLOCK_SIZE,
             self.WINDOW_WIDTH,
             self.WINDOW_HEIGHT,
-            self.is_landmine_here,
             self.occupied_blocks,
             self.fence,
+            self.barrels,
+            self.weather,
+            self.time,
+            self.bombs,
         )
 
     def run(self) -> None:
@@ -101,8 +138,8 @@ class Game:
                     self.sapper.auto_move_bfs(self.screen_drawer)
                 if event.key == pygame.K_a:
                     self.sapper.auto_move_a_star(self.screen_drawer)
-                if event.key == pygame.K_t:
-                    self.sapper.time_bfs_and_a_star()
+                if event.key == pygame.K_c:
+                    self.sapper.clear_the_site(self.screen_drawer)
                 if event.key == pygame.K_s:
                     x, y = pygame.mouse.get_pos()
                     x //= self.BLOCK_SIZE
@@ -110,27 +147,10 @@ class Game:
                     if (x, y) not in self.occupied_blocks:
                         self.sapper.change_goal((x, y, 0))
 
-            mouse_pressed = pygame.mouse.get_pressed()
-            x, y = pygame.mouse.get_pos()
-            x //= self.BLOCK_SIZE
-            y //= self.BLOCK_SIZE
-            if mouse_pressed[0]:
-                if (
-                    (x, y) not in self.occupied_blocks
-                    and 0 <= x < self.WINDOW_WIDTH // self.BLOCK_SIZE
-                    and 0 <= y < self.WINDOW_HEIGHT // self.BLOCK_SIZE
-                ):
-                    self.is_landmine_here[x][y] = True
-                    self.occupied_blocks.add((x, y))
-
-            if mouse_pressed[2]:
-                if (
-                    0 <= x < self.WINDOW_WIDTH // self.BLOCK_SIZE
-                    and 0 <= y < self.WINDOW_HEIGHT // self.BLOCK_SIZE
-                ):
-                    if self.is_landmine_here[x][y]:
-                        self.occupied_blocks.remove((x, y))
-                    self.is_landmine_here[x][y] = False
+            # mouse_pressed = pygame.mouse.get_pressed()
+            # x, y = pygame.mouse.get_pos()
+            # x //= self.BLOCK_SIZE
+            # y //= self.BLOCK_SIZE
 
     def _game_logic(self) -> None:
         pass
@@ -163,6 +183,35 @@ class Game:
                 surfaces_types[i][j] = choice
 
         return surfaces, surfaces_types
+
+    # this method is called only once during the initialization of the game
+    def _create_bombs(self) -> tuple[list[list[pygame.Surface]], list[list[str]]]:
+        bombs = [
+            [[] for _ in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE)]
+            for _ in range(self.WINDOW_WIDTH // self.BLOCK_SIZE)
+        ]
+        types_of_bombs = ["none", "claymore", "landmine", "hcb"]
+        weights = [500, 50, 30, 20]
+        for x in range(0, self.WINDOW_WIDTH, self.BLOCK_SIZE):
+            for y in range(0, self.WINDOW_HEIGHT, self.BLOCK_SIZE):
+                i, j = x // self.BLOCK_SIZE, y // self.BLOCK_SIZE
+                if (i, j) in self.occupied_blocks:
+                    continue
+
+                choice = choices(types_of_bombs, weights=weights, k=1)[0]
+                if choice == "none":
+                    continue
+                elif choice == "claymore":
+                    rect = self.claymore_surf.get_rect(topleft=(x, y))
+                    bombs[i][j].append([self.claymore_surf, rect, choice])
+                elif choice == "landmine":
+                    rect = self.landmine_surf.get_rect(topleft=(x, y))
+                    bombs[i][j].append([self.landmine_surf, rect, choice])
+                elif choice == "hcb":
+                    rect = self.hcb_surf.get_rect(topleft=(x, y))
+                    bombs[i][j].append([self.hcb_surf, rect, choice])
+
+        return bombs
 
     # this method is called only once during the initialization of the game
     def _create_fence(self) -> list[list]:
@@ -238,3 +287,46 @@ class Game:
         )
 
         return fence
+
+    # this method is called only once during the initialization of the game
+    def _create_barrels(self) -> list[list]:
+        barrels = []
+        for _ in range(20):
+            x = randint(0, self.WINDOW_WIDTH // self.BLOCK_SIZE - 1)
+            y = randint(0, self.WINDOW_HEIGHT // self.BLOCK_SIZE - 1)
+            if (x, y) not in self.occupied_blocks:
+                rect = self.barrel_surf.get_rect(
+                    topleft=(x * self.BLOCK_SIZE, y * self.BLOCK_SIZE)
+                )
+                barrels.append([self.barrel_surf, rect])
+                self.occupied_blocks.add((x, y))
+        return barrels
+
+    def _get_place_for_goal(self):
+        for x in range(1, self.WINDOW_WIDTH // self.BLOCK_SIZE - 1):
+            for y in range(1, self.WINDOW_HEIGHT // self.BLOCK_SIZE - 1):
+                if (x, y) not in self.occupied_blocks:
+                    return x, y
+
+    def _get_place_for_sapper(self):
+        for x in range(self.WINDOW_WIDTH // self.BLOCK_SIZE - 1, 0, -1):
+            for y in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE - 1, 0, -1):
+                if (x, y) not in self.occupied_blocks and not self.bombs[x][y]:
+                    return x, y
+
+    def _get_weather_and_time(self):
+        weather_choices = ["sunny", "rainy"]
+        weather_weights = [80, 20]
+        time_choices = ["day", "night"]
+        time_weights = [80, 20]
+
+        weather = choices(weather_choices, weights=weather_weights, k=1)[0]
+        time = choices(time_choices, weights=time_weights, k=1)[0]
+
+        return weather, time
+
+    def _get_sapper_type(self):
+        sapper_choices = ["sapper", "rain_defusing_sapper"]
+        sapper_weights = [70, 30]
+        sapper = choices(sapper_choices, weights=sapper_weights, k=1)[0]
+        return sapper

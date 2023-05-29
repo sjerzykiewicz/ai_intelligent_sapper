@@ -1,4 +1,4 @@
-from bomb import Bomb
+from bombs.bomb import Bomb
 
 
 class HarveysCasinoBomb(Bomb):
