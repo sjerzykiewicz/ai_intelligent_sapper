@@ -208,17 +208,17 @@ class Game:
                     continue
                 elif choice == "claymore":
                     rect = self.claymore_surf.get_rect(topleft=(x, y))
-                    bomb_path = f"bombs/claymore/clay-{claymore_count}.png"
+                    bomb_path = f"bombs/claymore/{claymore_count}.png"
                     claymore_count += 1
                     bombs[i][j].append([self.claymore_surf, rect, bomb_path])
                 elif choice == "landmine":
                     rect = self.landmine_surf.get_rect(topleft=(x, y))
-                    bomb_path = f"bombs/landmine/land-{landmine_count}.png"
+                    bomb_path = f"bombs/landmine/{landmine_count}.png"
                     landmine_count += 1
                     bombs[i][j].append([self.landmine_surf, rect, bomb_path])
                 elif choice == "hcb":
                     rect = self.hcb_surf.get_rect(topleft=(x, y))
-                    bomb_path = f"bombs/hcb/hcb-{hcb_count}.png"
+                    bomb_path = f"bombs/hcb/{hcb_count}.png"
                     hcb_count += 1
                     bombs[i][j].append([self.hcb_surf, rect, bomb_path])
 

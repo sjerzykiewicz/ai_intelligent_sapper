@@ -42,7 +42,9 @@ class Sapper:
         self.is_low_temp = is_low_temp
         self.decision_tree = self._deserialise_decision_tree()
         self.neural_network = self._load_neural_network_model()
-        self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        self.device = (
+            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        )
 
         self.surf = pygame.image.load(img).convert_alpha()
         i, j = pos
@@ -434,13 +436,12 @@ class Sapper:
         ImageNumpyFormat = np.asarray(img)
         plt.imshow(ImageNumpyFormat)
         plt.draw()
-        plt.pause(2) # pause how many seconds
+        plt.pause(1)  # pause how many seconds
         plt.close()
 
-        transform = transforms.Compose([
-            transforms.Resize((100, 100)),
-            transforms.ToTensor()
-        ])
+        transform = transforms.Compose(
+            [transforms.Resize((45, 60)), transforms.ToTensor()]
+        )
 
         input_tensor = transform(img).unsqueeze(0).to(self.device)
 
