@@ -1,13 +1,17 @@
-import pygame
-import dill
+import sys
 from collections import deque
 from queue import PriorityQueue
-import sys
 
-from search_states.bfs_state import BFSState
-from search_states.a_star_state import AStarState
+import dill
+import numpy as np
+import pygame
+import torch
+from PIL import Image
+from torchvision import transforms
 
 from decision_tree.decision_tree import DecisionTree
+from search_states.a_star_state import AStarState
+from search_states.bfs_state import BFSState
 
 
 class Sapper:
@@ -36,6 +40,8 @@ class Sapper:
         self.bombs = bombs
         self.is_low_temp = is_low_temp
         self.decision_tree = self._deserialise_decision_tree()
+        self.neural_network = self._load_neural_network_model()
+        self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
         self.surf = pygame.image.load(img).convert_alpha()
         i, j = pos
@@ -345,7 +351,10 @@ class Sapper:
             self.get_pos()[1] - self.get_goal()[1]
         )
         dist = "<=3" if distance_to_flag <= 3 else ">3"
-        bomb_type = bomb[2]
+        bomb_image_path = bomb[2]
+        print(bomb_image_path)
+        bomb_type = self._get_bomb_prediction(bomb_image_path)
+
         surface_type = self.surfaces_types[x][y]
         weather = self.weather
         time_of_day = self.time_of_day
@@ -355,7 +364,7 @@ class Sapper:
         sapper_type = "rain_defusing" if self.can_defuse_in_rain else "standard"
         is_low_temp = self.is_low_temp
         cur_state = {
-            "bomb_type": bomb_type,
+            "bomb_type": "hcb",
             "time_of_day": time_of_day,
             "is_barrel_nearby": is_occupied_block_nearby,
             "dist_from_flag": dist,
@@ -392,7 +401,7 @@ class Sapper:
 
     def _move_to_flag(self, screen_drawer, bomb) -> None:
         x, y = self.get_pos()
-        bomb_surf, _, choice = bomb
+        bomb_surf, _, bomb_path = bomb
         self.bombs[x][y].remove(bomb)
         if not self.bombs[x][y]:
             self.slowing_power[x][y] -= 50
@@ -402,7 +411,7 @@ class Sapper:
         rect = bomb_surf.get_rect(topleft=(x * self.block_size, y * self.block_size))
         if not self.bombs[x][y]:
             self.slowing_power[x][y] += 50
-        self.bombs[x][y].append([bomb_surf, rect, choice])
+        self.bombs[x][y].append([bomb_surf, rect, bomb_path])
 
     def _is_occupied_block_nearby(self, x, y):
         return (
@@ -412,6 +421,38 @@ class Sapper:
             or (x, y + 1) in self.occupied_blocks
         )
 
-    def _deserialise_decision_tree(self) -> DecisionTree:
+    def _deserialise_decision_tree(self):
         with open("decision_tree/decision_tree.joblib", "rb") as f:
             return dill.load(f)
+
+    def _load_neural_network_model(self):
+        return torch.load("neural_network/neural_network_model.pth")
+
+    def _get_bomb_prediction(self, bomb_image_path):
+        img = Image.open(bomb_image_path)
+
+        transform = transforms.Compose([
+            transforms.Resize((100, 100)),
+            transforms.ToTensor()
+        ])
+
+        input_tensor = transform(img).unsqueeze(0).to(self.device)
+
+        # Reshape the input tensor
+        batch_size = input_tensor.size(0)
+        input_tensor = input_tensor.view(batch_size, -1)
+
+        # Perform inference
+        with torch.no_grad():
+            output = self.neural_network(input_tensor)
+
+        # Interpret the output
+        predicted_class = np.argmax(output)
+
+        bomb_type = predicted_class.item()
+        print(bomb_type)
+        if bomb_type == 0:
+            return "claymore"
+        elif bomb_type == 1:
+            return "hcb"
+        return "landmine"

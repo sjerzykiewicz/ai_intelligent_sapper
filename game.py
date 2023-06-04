@@ -1,9 +1,11 @@
-import pygame
-from sappers.standard_sapper import StandardSapper
-from sappers.rain_defusing_sapper import RainDefusingSapper
 import sys
+from random import choice, choices, randint
+
+import pygame
+
+from sappers.rain_defusing_sapper import RainDefusingSapper
+from sappers.standard_sapper import StandardSapper
 from screen_drawer import ScreenDrawer
-from random import choices, randint, choice
 
 
 class Game:
@@ -190,6 +192,9 @@ class Game:
             [[] for _ in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE)]
             for _ in range(self.WINDOW_WIDTH // self.BLOCK_SIZE)
         ]
+        claymore_count = 0
+        landmine_count = 0
+        hcb_count = 0
         types_of_bombs = ["none", "claymore", "landmine", "hcb"]
         weights = [500, 50, 30, 20]
         for x in range(0, self.WINDOW_WIDTH, self.BLOCK_SIZE):
@@ -203,13 +208,19 @@ class Game:
                     continue
                 elif choice == "claymore":
                     rect = self.claymore_surf.get_rect(topleft=(x, y))
-                    bombs[i][j].append([self.claymore_surf, rect, choice])
+                    bomb_path = f"bombs/claymore/clay-{claymore_count}.png"
+                    claymore_count += 1
+                    bombs[i][j].append([self.claymore_surf, rect, bomb_path])
                 elif choice == "landmine":
                     rect = self.landmine_surf.get_rect(topleft=(x, y))
-                    bombs[i][j].append([self.landmine_surf, rect, choice])
+                    bomb_path = f"bombs/landmine/land-{landmine_count}.png"
+                    landmine_count += 1
+                    bombs[i][j].append([self.landmine_surf, rect, bomb_path])
                 elif choice == "hcb":
                     rect = self.hcb_surf.get_rect(topleft=(x, y))
-                    bombs[i][j].append([self.hcb_surf, rect, choice])
+                    bomb_path = f"bombs/hcb/hcb-{hcb_count}.png"
+                    hcb_count += 1
+                    bombs[i][j].append([self.hcb_surf, rect, bomb_path])
 
         return bombs
 
