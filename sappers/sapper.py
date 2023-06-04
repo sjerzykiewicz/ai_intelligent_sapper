@@ -8,6 +8,7 @@ import pygame
 import torch
 from PIL import Image
 from torchvision import transforms
+import matplotlib.pyplot as plt
 
 from decision_tree.decision_tree import DecisionTree
 from search_states.a_star_state import AStarState
@@ -352,8 +353,8 @@ class Sapper:
         )
         dist = "<=3" if distance_to_flag <= 3 else ">3"
         bomb_image_path = bomb[2]
-        print(bomb_image_path)
         bomb_type = self._get_bomb_prediction(bomb_image_path)
+        print(bomb_type)
 
         surface_type = self.surfaces_types[x][y]
         weather = self.weather
@@ -364,7 +365,7 @@ class Sapper:
         sapper_type = "rain_defusing" if self.can_defuse_in_rain else "standard"
         is_low_temp = self.is_low_temp
         cur_state = {
-            "bomb_type": "hcb",
+            "bomb_type": bomb_type,
             "time_of_day": time_of_day,
             "is_barrel_nearby": is_occupied_block_nearby,
             "dist_from_flag": dist,
@@ -430,6 +431,11 @@ class Sapper:
 
     def _get_bomb_prediction(self, bomb_image_path):
         img = Image.open(bomb_image_path)
+        ImageNumpyFormat = np.asarray(img)
+        plt.imshow(ImageNumpyFormat)
+        plt.draw()
+        plt.pause(2) # pause how many seconds
+        plt.close()
 
         transform = transforms.Compose([
             transforms.Resize((100, 100)),
@@ -450,7 +456,6 @@ class Sapper:
         predicted_class = np.argmax(output)
 
         bomb_type = predicted_class.item()
-        print(bomb_type)
         if bomb_type == 0:
             return "claymore"
         elif bomb_type == 1:
