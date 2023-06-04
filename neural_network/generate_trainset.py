@@ -9,7 +9,7 @@ image = ImageCaptcha(width=100, height=100)
 perms4 = list(permutations(all, 4))
 perms3 = list(permutations(all, 3))
 
-for i in range(1000):
+for i in range(3000):
     image.write(f"HCB", f"./trainset/hcb/hcb-{i}.png")
     image.write(f"CLAY", f"./trainset/claymore/clay-{i}.png")
     image.write(f"LAND", f"./trainset/landmine/land-{i}.png")
