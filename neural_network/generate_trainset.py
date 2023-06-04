@@ -1,7 +1,8 @@
-from captcha.image import ImageCaptcha
 from itertools import permutations
-from string import ascii_lowercase, digits
 from random import randint
+from string import ascii_lowercase, digits
+
+from captcha.image import ImageCaptcha
 
 all = ascii_lowercase + digits
 
