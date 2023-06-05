@@ -324,29 +324,35 @@ class Sapper:
                     last_tick = pygame.time.get_ticks()
                     break
 
-    def _get_bombs_to_neutralize(self) -> list:
+    def _get_spots_to_check(self) -> list:
         x_goal, y_goal, _ = self.get_goal()
-        bombs_to_neutralize = []
+        spots_to_check = []
+        iteration = 0
         for i in range(-5, 6):
+            row = []
             for j in range(-5, 6):
                 x, y = x_goal + i, y_goal + j
-                if x == x_goal and y == y_goal:
+                if not (0 <= x < self.win_x // self.block_size and 0 <= y < self.win_y // self.block_size):
                     continue
-                if (
-                    0 <= x < len(self.bombs)
-                    and 0 <= y < len(self.bombs[0])
-                    and self.bombs[x][y]
-                ):
-                    for bomb in self.bombs[x][y]:
-                        bombs_to_neutralize.append((x, y, bomb))
+                if (x == x_goal and y == y_goal) or (x, y) in self.occupied_blocks:
+                    continue
 
-        return bombs_to_neutralize
+                row.append((x, y))
+
+            if iteration:
+                spots_to_check.extend(row)
+            else:
+                spots_to_check.extend(row[::-1])
+            iteration = not iteration
+
+        return spots_to_check
 
     def clear_the_site(self, screen_drawer) -> None:
-        bombs_to_neutralize = self._get_bombs_to_neutralize()
-        for x, y, bomb in bombs_to_neutralize:
+        spots_to_check = self._get_spots_to_check()
+        for x, y in spots_to_check:
             self._auto_sapper_move(self._find_path_a_star(x, y, 0), screen_drawer)
-            self._neutralize_bomb(screen_drawer, x, y, bomb)
+            for bomb in self.bombs[x][y]:
+                self._neutralize_bomb(screen_drawer, x, y, bomb)
 
     def _neutralize_bomb(self, screen_drawer, x, y, bomb) -> None:
         # new = {'dist_from_flag':'>=10', 'bomb_type':'claymore','surface_type':'unpaved_road','weather':'rainy','time_of_day':'night','is_barrel_nearby':'yes', 'sapper_type':'standard','is_low_temp':'no'}
