@@ -1,3 +1,4 @@
+import decision_tree.decision_tree
 import sys
 from random import choice, choices, randint
 
