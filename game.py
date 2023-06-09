@@ -1,11 +1,9 @@
-import decision_tree.decision_tree
 import sys
 from random import choice, choices, randint
 
 import pygame
 
-from sappers.rain_defusing_sapper import RainDefusingSapper
-from sappers.standard_sapper import StandardSapper
+from sappers.sapper_factory import SapperFactory
 from screen_drawer import ScreenDrawer
 
 
@@ -63,7 +61,6 @@ class Game:
         place_for_goal = self._get_place_for_goal()
         place_for_sapper = self._get_place_for_sapper()
 
-        self.sapper_type = self._get_sapper_type()
         self.weather, self.time = self._get_weather_and_time()
         self.is_low_temperature = choice(["yes", "no"])
         if self.is_low_temperature == "yes":
@@ -71,7 +68,10 @@ class Game:
         else:
             print("Normal temperature!")
 
-        self.sapper = StandardSapper(
+        sapper_type = self._get_sapper_type()
+        sapper_factory = SapperFactory()
+        self.sapper = sapper_factory.create_sapper(
+            sapper_type,
             place_for_sapper,
             self.BLOCK_SIZE,
             (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
@@ -83,20 +83,6 @@ class Game:
             self.bombs,
             self.is_low_temperature,
         )
-
-        if self.sapper_type == "rain_defusing_sapper":
-            self.sapper = RainDefusingSapper(
-                place_for_sapper,
-                self.BLOCK_SIZE,
-                (self.WINDOW_WIDTH, self.WINDOW_HEIGHT),
-                self.occupied_blocks,
-                self.surfaces_types,
-                place_for_goal,
-                self.weather,
-                self.time,
-                self.bombs,
-                self.is_low_temperature,
-            )
 
         self.screen_drawer = ScreenDrawer(
             self.sapper,
@@ -338,7 +324,7 @@ class Game:
         return weather, time
 
     def _get_sapper_type(self):
-        sapper_choices = ["sapper", "rain_defusing_sapper"]
+        sapper_choices = ["standard", "rain_defusing"]
         sapper_weights = [70, 30]
         sapper = choices(sapper_choices, weights=sapper_weights, k=1)[0]
         return sapper
