@@ -5,6 +5,7 @@ import pygame
 
 from sappers.sapper_factory import SapperFactory
 from screen_drawer import ScreenDrawer
+import genetic_algorithm.generate_bomb_placement as ga
 
 
 class Game:
@@ -53,7 +54,9 @@ class Game:
         hcb = "gfx/bombs/hcb.png"
         self.hcb_surf = pygame.image.load(hcb).convert_alpha()
 
-        self.bombs = self._create_bombs()
+        bomb_placement = ga.generate_bomb_placement()
+        self.bombs = self._place_bombs(bomb_placement)
+        # self.bombs = self._create_bombs()
 
         self.flag_path = "gfx/flags/flag.png"
         self.flag_surf = pygame.image.load(self.flag_path).convert_alpha()
@@ -289,6 +292,17 @@ class Game:
         for _ in range(20):
             x = randint(0, self.WINDOW_WIDTH // self.BLOCK_SIZE - 1)
             y = randint(0, self.WINDOW_HEIGHT // self.BLOCK_SIZE - 1)
+            if (
+                (x - 1, y) in self.occupied_blocks
+                or (x + 1, y) in self.occupied_blocks
+                or (x, y - 1) in self.occupied_blocks
+                or (x, y + 1) in self.occupied_blocks
+                or (x - 1, y - 1) in self.occupied_blocks
+                or (x + 1, y - 1) in self.occupied_blocks
+                or (x - 1, y + 1) in self.occupied_blocks
+                or (x + 1, y + 1) in self.occupied_blocks
+            ):
+                continue
             if (x, y) not in self.occupied_blocks:
                 rect = self.barrel_surf.get_rect(
                     topleft=(x * self.BLOCK_SIZE, y * self.BLOCK_SIZE)
@@ -325,3 +339,47 @@ class Game:
         sapper_weights = [70, 30]
         sapper = choices(sapper_choices, weights=sapper_weights, k=1)[0]
         return sapper
+
+    # this method is called only once during the initialization of the game
+    def _place_bombs(self, bomb_placement: str):
+        gene = [["" for _ in range(35)] for _ in range(21)]
+        for i, g in enumerate(bomb_placement):
+            gene[i // 35][i % 35] = g
+        bombs = [
+            [[] for _ in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE)]
+            for _ in range(self.WINDOW_WIDTH // self.BLOCK_SIZE)
+        ]
+        claymore_count = 0
+        landmine_count = 0
+        hcb_count = 0
+        mapping = {"N": "none", "C": "claymore", "L": "landmine", "H": "hcb"}
+
+        for x in range(
+            self.BLOCK_SIZE, self.WINDOW_WIDTH - self.BLOCK_SIZE, self.BLOCK_SIZE
+        ):
+            for y in range(
+                self.BLOCK_SIZE, self.WINDOW_HEIGHT - self.BLOCK_SIZE, self.BLOCK_SIZE
+            ):
+                i, j = x // self.BLOCK_SIZE, y // self.BLOCK_SIZE
+                if (i, j) in self.occupied_blocks:
+                    continue
+                bomb = mapping[gene[j - 1][i - 1]]
+                if bomb == "none":
+                    continue
+                elif bomb == "claymore":
+                    rect = self.claymore_surf.get_rect(topleft=(x, y))
+                    bomb_path = f"bombs/claymore/{claymore_count}.png"
+                    claymore_count += 1
+                    bombs[i][j].append([self.claymore_surf, rect, bomb_path])
+                elif bomb == "landmine":
+                    rect = self.landmine_surf.get_rect(topleft=(x, y))
+                    bomb_path = f"bombs/landmine/{landmine_count}.png"
+                    landmine_count += 1
+                    bombs[i][j].append([self.landmine_surf, rect, bomb_path])
+                elif bomb == "hcb":
+                    rect = self.hcb_surf.get_rect(topleft=(x, y))
+                    bomb_path = f"bombs/hcb/{hcb_count}.png"
+                    hcb_count += 1
+                    bombs[i][j].append([self.hcb_surf, rect, bomb_path])
+
+        return bombs
