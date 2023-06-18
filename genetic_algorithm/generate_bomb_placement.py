@@ -6,7 +6,7 @@ class Genom:
         # none, landmine, claymore, hcb
         self.possible_genes = ["N", "L", "C", "H"]
         self.possible_genes_weights = [500, 50, 30, 20]
-        self.population_size = 70
+        self.population_size = 50
 
     def get_random_gene(self) -> str:
         return random.choices(
@@ -57,6 +57,7 @@ class Individual(Genom):
 
     def mate(self, other):
         new_chromosome = []
+        
         for gene1, gene2 in zip(self.chromosome, other.chromosome):
             probability = random.random()
             if probability < 0.45:
@@ -79,7 +80,7 @@ def generate_bomb_placement():
     )
     while (
         population[0].fitness
-        < 0.75
+        < 0.77
         * (
             population[0].chromosome.count("L")
             + population[0].chromosome.count("C")
@@ -89,10 +90,11 @@ def generate_bomb_placement():
     ):
         if generation % 50 == 0:
             print(f"Generation: {generation}\tBest fitness: {population[0].fitness}")
-        new_population = population[:5]
+        individuals_to_reproduce = population[:8]
+        new_population = individuals_to_reproduce[:4]
         for _ in range(population[0].population_size - 5):
-            parent1 = random.choice(population[:15])
-            parent2 = random.choice(population[:15])
+            parent1 = random.choice(individuals_to_reproduce)
+            parent2 = random.choice(individuals_to_reproduce)
             new_population.append(parent1.mate(parent2))
         population = sorted(
             new_population, key=lambda individual: individual.fitness, reverse=True
