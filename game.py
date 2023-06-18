@@ -291,6 +291,15 @@ class Game:
         for _ in range(20):
             x = randint(0, self.WINDOW_WIDTH // self.BLOCK_SIZE - 1)
             y = randint(0, self.WINDOW_HEIGHT // self.BLOCK_SIZE - 1)
+            if ((x - 1, y) in self.occupied_blocks
+                or (x + 1, y) in self.occupied_blocks
+                or (x, y - 1) in self.occupied_blocks
+                or (x, y + 1) in self.occupied_blocks
+                or (x - 1, y - 1) in self.occupied_blocks
+                or (x + 1, y - 1) in self.occupied_blocks
+                or (x - 1, y + 1) in self.occupied_blocks
+                or (x + 1, y + 1) in self.occupied_blocks):
+                continue
             if (x, y) not in self.occupied_blocks:
                 rect = self.barrel_surf.get_rect(
                     topleft=(x * self.BLOCK_SIZE, y * self.BLOCK_SIZE)
