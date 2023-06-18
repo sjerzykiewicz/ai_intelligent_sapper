@@ -129,17 +129,14 @@ class Game:
                     self.sapper.auto_move_a_star(self.screen_drawer)
                 if event.key == pygame.K_c:
                     self.sapper.clear_the_site(self.screen_drawer)
-                if event.key == pygame.K_s:
-                    x, y = pygame.mouse.get_pos()
-                    x //= self.BLOCK_SIZE
-                    y //= self.BLOCK_SIZE
-                    if (x, y) not in self.occupied_blocks:
-                        self.sapper.change_goal((x, y, 0))
 
-            # mouse_pressed = pygame.mouse.get_pressed()
-            # x, y = pygame.mouse.get_pos()
-            # x //= self.BLOCK_SIZE
-            # y //= self.BLOCK_SIZE
+            mouse_pressed = pygame.mouse.get_pressed()
+            if mouse_pressed[0]:
+                x, y = pygame.mouse.get_pos()
+                x //= self.BLOCK_SIZE
+                y //= self.BLOCK_SIZE
+                if (x, y) not in self.occupied_blocks:
+                    self.sapper.change_goal((x, y, 0))
 
     def _game_logic(self) -> None:
         pass
