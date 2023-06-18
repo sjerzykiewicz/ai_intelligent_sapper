@@ -5,6 +5,7 @@ import pygame
 
 from sappers.sapper_factory import SapperFactory
 from screen_drawer import ScreenDrawer
+import genetic_algorithm.generate_bomb_placement as ga
 
 
 class Game:
@@ -53,7 +54,8 @@ class Game:
         hcb = "gfx/bombs/hcb.png"
         self.hcb_surf = pygame.image.load(hcb).convert_alpha()
 
-        self.bombs = self._create_bombs()
+        bomb_placement = ga.generate_bomb_placement()
+        self.bombs = self._place_bombs(bomb_placement)
 
         self.flag_path = "gfx/flags/flag.png"
         self.flag_surf = pygame.image.load(self.flag_path).convert_alpha()
@@ -325,3 +327,43 @@ class Game:
         sapper_weights = [70, 30]
         sapper = choices(sapper_choices, weights=sapper_weights, k=1)[0]
         return sapper
+
+    # this method is called only once during the initialization of the game
+    def _place_bombs(self, bomb_placement: str):
+        bombs = [
+            [[] for _ in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE)]
+            for _ in range(self.WINDOW_WIDTH // self.BLOCK_SIZE)
+        ]
+        claymore_count = 0
+        landmine_count = 0
+        hcb_count = 0
+        mapping = {"N" : "none", "C" : "claymore", "L" : "landmine", "H" : "hcb"}
+        index = 0
+
+        for x in range(self.BLOCK_SIZE, self.WINDOW_WIDTH - self.BLOCK_SIZE, self.BLOCK_SIZE):
+            for y in range(self.BLOCK_SIZE, self.WINDOW_HEIGHT - self.BLOCK_SIZE, self.BLOCK_SIZE):
+                i, j = x // self.BLOCK_SIZE, y // self.BLOCK_SIZE
+                if (i, j) in self.occupied_blocks:
+                    continue
+
+                bomb = mapping[bomb_placement[index]]
+                index += 1
+                if bomb == "none":
+                    continue
+                elif bomb == "claymore":
+                    rect = self.claymore_surf.get_rect(topleft=(x, y))
+                    bomb_path = f"bombs/claymore/{claymore_count}.png"
+                    claymore_count += 1
+                    bombs[i][j].append([self.claymore_surf, rect, bomb_path])
+                elif bomb == "landmine":
+                    rect = self.landmine_surf.get_rect(topleft=(x, y))
+                    bomb_path = f"bombs/landmine/{landmine_count}.png"
+                    landmine_count += 1
+                    bombs[i][j].append([self.landmine_surf, rect, bomb_path])
+                elif bomb == "hcb":
+                    rect = self.hcb_surf.get_rect(topleft=(x, y))
+                    bomb_path = f"bombs/hcb/{hcb_count}.png"
+                    hcb_count += 1
+                    bombs[i][j].append([self.hcb_surf, rect, bomb_path])
+
+        return bombs
