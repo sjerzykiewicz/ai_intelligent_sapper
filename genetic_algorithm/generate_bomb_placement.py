@@ -26,7 +26,7 @@ class Genom:
                                  "NNNLNNNCNNNHNNNHNNNNLNNNCNNNHNNNLNN" + \
                                  "HNNNNLNNNCNNNLNNNHNNNNCNNNLNNNHNNNL" + \
                                  "NHNNNLLHNNNNNNNNNNNHNNNNNCNNNNCNNNL"
-        self.population_size = 50
+        self.population_size = 70
 
     def get_random_gene(self) -> str:
         return random.choice(self.possible_genes)
@@ -68,13 +68,13 @@ def generate_bomb_placement():
     generation = 0
 
     population = sorted(Genom().get_random_population(), key=lambda individual: individual.fitness, reverse=True)
-    while population[0].fitness < len(population[0].target_chromosome) and generation < 1000:
+    while population[0].fitness < len(population[0].target_chromosome) and generation < 3000:
         if generation % 50 == 0:
             print(f"Generation: {generation}\tBest fitness: {population[0].fitness}")
-        new_population = population[:3]
-        for _ in range(population[0].population_size - 3):
-            parent1 = random.choice(population[:20])
-            parent2 = random.choice(population[:20])
+        new_population = population[:5]
+        for _ in range(population[0].population_size - 5):
+            parent1 = random.choice(population[:15])
+            parent2 = random.choice(population[:15])
             new_population.append(parent1.mate(parent2))
         population = sorted(new_population, key=lambda individual: individual.fitness, reverse=True)
         generation += 1
