@@ -65,7 +65,7 @@ class Individual(Genom):
 
 
 def generate_bomb_placement():
-    generation = 1
+    generation = 0
 
     population = sorted(Genom().get_random_population(), key=lambda individual: individual.fitness, reverse=True)
     while population[0].fitness < len(population[0].target_chromosome) and generation < 1000:
