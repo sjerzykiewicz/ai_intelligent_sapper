@@ -55,6 +55,7 @@ class ScreenDrawer:
             self.time_filter.fill((0, 0, 0))
             self.time_filter.set_alpha(100)
 
+    # we could make this method run concurrently with the game loop
     def draw_screen(self) -> None:
         self._draw_screen()
 
