@@ -1,2 +1,3 @@
-# ai_intelligent_sapper
+## Intelligent Sapper Game
 
+#### Authors: Sebastian Jerzykiewicz, Jan Wojciechowski

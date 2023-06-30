@@ -54,6 +54,7 @@ class Game:
         hcb = "gfx/bombs/hcb.png"
         self.hcb_surf = pygame.image.load(hcb).convert_alpha()
 
+        # the bomb placement is generated using our custom made genetic algorithm
         bomb_placement = ga.generate_bomb_placement()
         self.bombs = self._place_bombs(bomb_placement)
         # self.bombs = self._create_bombs()
@@ -72,6 +73,7 @@ class Game:
             print("Normal temperature!")
 
         sapper_type = self._get_sapper_type()
+        # sapper is created using the factory design pattern
         sapper_factory = SapperFactory()
         self.sapper = sapper_factory.create_sapper(
             sapper_type,
@@ -105,6 +107,7 @@ class Game:
             self.bombs,
         )
 
+    # main loop of the game
     def run(self) -> None:
         while True:
             self._handle_events()
@@ -112,6 +115,7 @@ class Game:
             self._game_logic()
             self.clock.tick(60)
 
+    # handle user input
     def _handle_events(self) -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -141,6 +145,7 @@ class Game:
                 if (x, y) not in self.occupied_blocks:
                     self.sapper.change_goal((x, y, 0))
 
+    # we can add some game logic here later on
     def _game_logic(self) -> None:
         pass
 
@@ -311,18 +316,21 @@ class Game:
                 self.occupied_blocks.add((x, y))
         return barrels
 
+    # this method is called only once during the initialization of the game
     def _get_place_for_goal(self):
         for x in range(1, self.WINDOW_WIDTH // self.BLOCK_SIZE - 1):
             for y in range(1, self.WINDOW_HEIGHT // self.BLOCK_SIZE - 1):
                 if (x, y) not in self.occupied_blocks:
                     return x, y
 
+    # this method is called only once during the initialization of the game
     def _get_place_for_sapper(self):
         for x in range(self.WINDOW_WIDTH // self.BLOCK_SIZE - 1, 0, -1):
             for y in range(self.WINDOW_HEIGHT // self.BLOCK_SIZE - 1, 0, -1):
                 if (x, y) not in self.occupied_blocks and not self.bombs[x][y]:
                     return x, y
 
+    # this method is called only once during the initialization of the game
     def _get_weather_and_time(self):
         weather_choices = ["sunny", "rainy"]
         weather_weights = [80, 20]
@@ -334,6 +342,7 @@ class Game:
 
         return weather, time
 
+    # this method is called only once during the initialization of the game
     def _get_sapper_type(self):
         sapper_choices = ["standard", "rain_defusing"]
         sapper_weights = [70, 30]
